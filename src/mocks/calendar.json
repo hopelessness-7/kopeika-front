@@ -1,0 +1,25 @@
+{
+  "days": [
+    {
+      "date": "2026-06-04",
+      "obligations": [
+        { "id": 1, "title": "Ипотека", "amount": 24100, "type": "loan" }
+      ],
+      "total": 24100
+    },
+    {
+      "date": "2026-06-12",
+      "obligations": [
+        { "id": 2, "title": "Подписка Яндекс Плюс", "amount": 399, "type": "subscription" }
+      ],
+      "total": 399
+    },
+    {
+      "date": "2026-06-20",
+      "obligations": [
+        { "id": 3, "title": "Долг Андрею", "amount": 5000, "type": "personal_debt" }
+      ],
+      "total": 5000
+    }
+  ]
+}

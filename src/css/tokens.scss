@@ -1,0 +1,83 @@
+// Design tokens — светлая тема (мобильная база, ≤1023px)
+:root,
+[data-theme='light'] {
+  --k-font: 'Inter', system-ui, -apple-system, sans-serif;
+
+  --k-space-1: 4px;
+  --k-space-2: 8px;
+  --k-space-3: 12px;
+  --k-space-4: 16px;
+  --k-space-5: 20px;
+  --k-space-6: 24px;
+
+  --k-bg: #eceef4;
+  --k-surface: #ffffff;
+  --k-surface-muted: #f8fafc;
+  --k-border: rgba(15, 23, 42, 0.08);
+  --k-divider: rgba(15, 23, 42, 0.06);
+
+  --k-text: #0f172a;
+  --k-text-secondary: #64748b;
+  --k-text-muted: #94a3b8;
+
+  --k-primary: #4f46e5;
+  --k-primary-soft: #eef2ff;
+  --k-primary-gradient: linear-gradient(135deg, #6366f1 0%, #4f46e5 48%, #4338ca 100%);
+  --k-warm-soft: #fff7ed;
+  --k-warm: #ea580c;
+
+  --k-radius: 16px;
+  --k-radius-lg: 20px;
+
+  --k-page-max: 420px;
+  --k-page-max-wide: 420px;
+  --k-nav-height: 80px;
+  --k-sidebar-width: 0px;
+
+  --k-nav-bg: rgba(255, 255, 255, 0.94);
+  --k-nav-shadow: 0 8px 32px rgba(15, 23, 42, 0.1);
+
+  --k-zone-green: #059669;
+  --k-zone-green-bg: #ecfdf5;
+  --k-zone-yellow: #d97706;
+  --k-zone-yellow-bg: #fffbeb;
+  --k-zone-red: #e11d48;
+  --k-zone-red-bg: #fff1f2;
+
+  --k-zone-yellow-text: #92400e;
+  --k-zone-green-text: #047857;
+  --k-zone-red-text: #be123c;
+
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  --k-bg: #0c0e14;
+  --k-surface: #161922;
+  --k-surface-muted: #1e2230;
+  --k-border: rgba(255, 255, 255, 0.08);
+  --k-divider: rgba(255, 255, 255, 0.06);
+
+  --k-text: #f1f5f9;
+  --k-text-secondary: #94a3b8;
+  --k-text-muted: #64748b;
+
+  --k-primary: #818cf8;
+  --k-primary-soft: rgba(129, 140, 248, 0.15);
+  --k-primary-gradient: linear-gradient(135deg, #6366f1 0%, #4f46e5 48%, #3730a3 100%);
+  --k-warm-soft: rgba(234, 88, 12, 0.15);
+  --k-warm: #fb923c;
+
+  --k-nav-bg: rgba(22, 25, 34, 0.94);
+  --k-nav-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+
+  --k-zone-green-bg: rgba(5, 150, 105, 0.15);
+  --k-zone-yellow-bg: rgba(217, 119, 6, 0.15);
+  --k-zone-red-bg: rgba(225, 29, 72, 0.15);
+
+  --k-zone-yellow-text: #fbbf24;
+  --k-zone-green-text: #34d399;
+  --k-zone-red-text: #fb7185;
+
+  color-scheme: dark;
+}

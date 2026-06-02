@@ -1,102 +1,86 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
+  <q-layout
+    view="hHh lpR fFf"
+    class="k-layout"
+    :class="{ 'k-layout--desktop': isDesktop && showTabs }"
+  >
+    <AppSidebar v-if="isDesktop && showTabs" />
+
+    <q-header v-if="showHeader" class="k-app-header">
       <q-toolbar>
         <q-btn
+          v-if="showBack"
           flat
-          dense
           round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
+          dense
+          icon="arrow_back"
+          aria-label="Назад"
+          @click="$router.back()"
         />
-
-        <q-toolbar-title>
-          Quasar App
-        </q-toolbar-title>
-
-        <div>Quasar v{{ $q.version }}</div>
+        <q-toolbar-title>{{ pageTitle }}</q-toolbar-title>
       </q-toolbar>
     </q-header>
 
-    <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      bordered
-    >
-      <q-list>
-        <q-item-label
-          header
-        >
-          Essential Links
-        </q-item-label>
-
-        <EssentialLink
-          v-for="link in linksList"
-          :key="link.title"
-          v-bind="link"
-        />
-      </q-list>
-    </q-drawer>
-
-    <q-page-container>
+    <q-page-container class="k-layout__content">
       <router-view />
     </q-page-container>
+
+    <q-footer v-if="showTabs && !isDesktop" class="k-footer">
+      <AppBottomNav />
+    </q-footer>
   </q-layout>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import EssentialLink from 'components/EssentialLink.vue'
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+import { useQuasar } from 'quasar'
+import AppBottomNav from 'src/components/common/AppBottomNav.vue'
+import AppSidebar from 'src/components/common/AppSidebar.vue'
 
-const linksList = [
-  {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev'
-  },
-  {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework'
-  },
-  {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev'
-  },
-  {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev'
-  },
-  {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev'
-  },
-  {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev'
-  },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev'
-  }
-]
+const route = useRoute()
+const $q = useQuasar()
 
-const leftDrawerOpen = ref(false)
+const isDesktop = computed(() => $q.screen.width >= 1024)
 
-function toggleLeftDrawer () {
-  leftDrawerOpen.value = !leftDrawerOpen.value
+const titles = {
+  '/obligations': 'Обязательства',
+  '/obligations/new': 'Новое обязательство',
+  '/calendar': 'Календарь',
+  '/import': 'Сверка',
+  '/settings': 'Настройки',
+  '/check-in': 'Быстрая сверка'
 }
+
+const showTabs = computed(() => {
+  const hidden = ['/check-in', '/obligations/new']
+  if (hidden.includes(route.path)) return false
+  if (route.path.match(/^\/obligations\/\d+\/edit$/)) return false
+  if (route.path.match(/^\/import\/\d+\/summary$/)) return false
+  return true
+})
+
+const showBack = computed(() => !showTabs.value)
+
+const showHeader = computed(() => {
+  const p = route.path
+  if (['/', '/obligations', '/calendar', '/import', '/settings', '/check-in', '/obligations/new'].includes(p)) {
+    return false
+  }
+  if (/^\/obligations\/\d+\/edit$/.test(p)) return false
+  if (/^\/import\/\d+\/summary$/.test(p)) return false
+  return true
+})
+
+const pageTitle = computed(() => {
+  if (route.path.match(/^\/obligations\/\d+\/edit$/)) return 'Редактирование'
+  if (route.path.match(/^\/import\/\d+\/summary$/)) return 'Итог периода'
+  return titles[route.path] || 'Kopeika'
+})
 </script>
+
+<style scoped>
+.k-footer {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+</style>

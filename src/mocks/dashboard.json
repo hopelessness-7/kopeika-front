@@ -1,0 +1,40 @@
+{
+  "balance": 21800,
+  "balance_updated_at": "2026-05-28T10:00:00+03:00",
+  "zone": "yellow",
+  "free_after_obligations": 12400,
+  "anchors": {
+    "primary": "import",
+    "salary": {
+      "day_of_month": 25,
+      "next_date": "2026-06-25",
+      "days_remaining": 12,
+      "daily_limit": 1620
+    },
+    "import": {
+      "interval_days": 10,
+      "last_import_at": "2026-05-22",
+      "next_due_at": "2026-06-01",
+      "days_remaining": 4,
+      "daily_limit": 1450
+    }
+  },
+  "primary_daily_limit": 1450,
+  "next_obligation": {
+    "id": 1,
+    "title": "Ипотека",
+    "due_date": "2026-06-04",
+    "amount": 24100,
+    "days_until": 3,
+    "balance_covers": false,
+    "shortfall": 2300
+  },
+  "obligations_until_salary_total": 9400,
+  "check_in_due": true,
+  "import_due": false,
+  "import_overdue": false,
+  "streak": {
+    "import_on_time": 2,
+    "check_in_weeks": 2
+  }
+}

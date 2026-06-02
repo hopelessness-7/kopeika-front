@@ -1,1 +1,201 @@
-// app global css
+@import './tokens.scss';
+@import './layout.scss';
+@import './desktop.scss';
+
+* {
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--k-font);
+  background: var(--k-bg);
+  color: var(--k-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+.q-layout,
+.q-page {
+  font-family: var(--k-font);
+  background: transparent;
+}
+
+// ——— Bottom nav ———
+.k-bottom-nav {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  width: calc(100% - 32px);
+  max-width: 388px;
+  height: 60px;
+  background: var(--k-nav-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--k-border);
+  border-radius: 18px;
+  box-shadow: var(--k-nav-shadow);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 6px;
+  z-index: 2000;
+
+  &__item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 6px 2px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: var(--k-text-muted);
+    font-size: 0.625rem;
+    font-weight: 600;
+    transition: color 0.12s, background 0.12s;
+    min-width: 0;
+
+    .q-icon {
+      font-size: 22px;
+    }
+
+    &--active {
+      color: var(--k-primary);
+      background: var(--k-primary-soft);
+    }
+  }
+}
+
+.k-app-header {
+  background: var(--k-bg) !important;
+  box-shadow: none !important;
+
+  .q-toolbar {
+    min-height: 52px;
+    padding: 0 var(--k-space-2);
+  }
+
+  .q-toolbar__title {
+    font-size: 1.0625rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+}
+
+.k-footer {
+  background: transparent !important;
+  box-shadow: none !important;
+  pointer-events: none;
+
+  > * {
+    pointer-events: auto;
+  }
+}
+
+.q-footer {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+// ——— Forms ———
+.k-form {
+  .q-field--outlined .q-field__control {
+    border-radius: 12px;
+  }
+}
+
+.k-btn-primary {
+  border-radius: 14px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  min-height: 48px !important;
+}
+
+.k-fab .q-btn {
+  width: 56px !important;
+  height: 56px !important;
+  box-shadow: 0 8px 24px rgba(79, 70, 229, 0.35) !important;
+}
+
+.k-sheet {
+  border-radius: 20px 20px 0 0 !important;
+
+  .text-h6 {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+}
+
+// Obligations (оставляем карточки долгов)
+.k-obligation {
+  display: flex;
+  gap: var(--k-space-3);
+  padding: var(--k-space-4);
+  background: var(--k-surface);
+  border-radius: var(--k-radius-lg);
+  border: 1px solid var(--k-border);
+  margin-bottom: var(--k-space-3);
+
+  &__icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--k-primary-soft);
+    color: var(--k-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  &__body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  &__type {
+    display: inline-block;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--k-primary);
+    background: var(--k-primary-soft);
+    padding: 2px 8px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+  }
+
+  &__amount {
+    font-size: 0.8125rem;
+    color: var(--k-text-secondary);
+  }
+
+  &__remain {
+    font-size: 0.75rem;
+    color: var(--k-text-muted);
+    margin-top: 2px;
+  }
+}
+
+.page-intro {
+  margin: 0 0 var(--k-space-4);
+  font-size: 0.875rem;
+  color: var(--k-text-secondary);
+  line-height: 1.45;
+}
+
+.q-btn {
+  text-transform: none;
+  font-weight: 600;
+}
+
+.q-dialog__backdrop {
+  backdrop-filter: blur(4px);
+}

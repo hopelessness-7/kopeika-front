@@ -1,0 +1,11 @@
+{
+  "period_from": "2026-05-12",
+  "period_to": "2026-05-22",
+  "days_count": 10,
+  "actual_spend": 18400,
+  "planned_spend": 16200,
+  "delta": 2200,
+  "suggested_balance": 21800,
+  "new_daily_limit": 1450,
+  "new_limit_until": "2026-06-01"
+}

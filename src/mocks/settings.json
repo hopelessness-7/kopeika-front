@@ -1,0 +1,10 @@
+{
+  "salary_day_of_month": 25,
+  "salary_amount": 120000,
+  "import_interval_days": 10,
+  "last_import_at": "2026-05-22",
+  "primary_anchor": "auto",
+  "buffer_amount": 5000,
+  "buffer_percent": null,
+  "notification_mode": "normal"
+}

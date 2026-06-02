@@ -1,0 +1,322 @@
+// Единый каркас страниц — все экраны через эти классы
+
+.k-page {
+  max-width: var(--k-page-max);
+  margin: 0 auto;
+  padding: var(--k-space-4);
+  padding-bottom: calc(var(--k-nav-height) + var(--k-space-4));
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--k-space-3); // 12px: шапка → контент
+}
+
+.k-page--wide {
+  max-width: var(--k-page-max-wide);
+}
+
+// Контентная зона (панели, списки) — на всю ширину k-page
+.k-page-body {
+  width: 100%;
+  min-width: 0;
+}
+
+.k-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--k-space-3);
+}
+
+.k-stack--lg {
+  gap: var(--k-space-4);
+}
+
+// Одна белая панель на экране (главная, настройки)
+.k-panel {
+  background: var(--k-surface);
+  border-radius: var(--k-radius-lg);
+  border: 1px solid var(--k-border);
+  overflow: hidden;
+}
+
+.k-panel__section {
+  padding: var(--k-space-4);
+
+  & + & {
+    border-top: 1px solid var(--k-divider);
+  }
+
+  &--accent {
+    background: linear-gradient(160deg, #4f46e5 0%, #4338ca 100%);
+    color: #fff;
+    border-top: none;
+  }
+
+  &--accent.k-panel__section--green {
+    background: linear-gradient(160deg, #059669 0%, #047857 100%);
+  }
+
+  &--accent.k-panel__section--yellow {
+    background: linear-gradient(160deg, #d97706 0%, #b45309 100%);
+  }
+
+  &--accent.k-panel__section--red {
+    background: linear-gradient(160deg, #e11d48 0%, #be123c 100%);
+  }
+}
+
+.k-panel__label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--k-text-muted);
+  margin: 0 0 var(--k-space-2);
+
+  .k-panel__section--accent & {
+    color: rgba(255, 255, 255, 0.8);
+  }
+}
+
+.k-panel__hero-value {
+  font-size: 2.25rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin: 0;
+
+  .k-panel__section--accent & {
+    color: #fff;
+  }
+}
+
+.k-panel__hero-meta {
+  font-size: 0.875rem;
+  color: var(--k-text-secondary);
+  margin: var(--k-space-2) 0 0;
+
+  .k-panel__section--accent & {
+    color: rgba(255, 255, 255, 0.85);
+  }
+}
+
+// Сетка 2 колонки одинаковой ширины
+.k-cols-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--k-space-3);
+}
+
+.k-metric {
+  &__label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--k-text-muted);
+    margin-bottom: var(--k-space-1);
+  }
+
+  &__value {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--k-text);
+  }
+
+  &__sub {
+    font-size: 0.6875rem;
+    color: var(--k-text-secondary);
+    margin-top: var(--k-space-1);
+  }
+
+  &--tap {
+    cursor: pointer;
+    border-radius: var(--k-radius);
+    padding: var(--k-space-2);
+    margin: calc(-1 * var(--k-space-2));
+    transition: background 0.15s;
+
+    &:active {
+      background: var(--k-primary-soft);
+    }
+  }
+}
+
+.k-limit-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--k-space-3);
+
+  &--one {
+    grid-template-columns: 1fr;
+  }
+
+  &__item {
+    padding: var(--k-space-3);
+    background: var(--k-surface-muted);
+    border-radius: var(--k-radius);
+    border: 1px solid var(--k-divider);
+  }
+
+  &__name {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--k-text-muted);
+    margin-bottom: var(--k-space-1);
+  }
+
+  &__value {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--k-text);
+  }
+
+  &__days {
+    font-size: 0.6875rem;
+    color: var(--k-text-secondary);
+    margin-top: 2px;
+  }
+}
+
+.k-zone-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+
+  &--green {
+    background: var(--k-zone-green-bg);
+    color: var(--k-zone-green);
+  }
+  &--yellow {
+    background: var(--k-zone-yellow-bg);
+    color: var(--k-zone-yellow);
+  }
+  &--red {
+    background: var(--k-zone-red-bg);
+    color: var(--k-zone-red);
+  }
+
+  // На цветной шапке лимита (зелёный / жёлтый / красный градиент)
+  &--on-accent {
+    background: rgba(0, 0, 0, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    color: #fff;
+    backdrop-filter: blur(8px);
+    flex-shrink: 0;
+  }
+}
+
+.k-row-action {
+  display: flex;
+  align-items: center;
+  gap: var(--k-space-3);
+  padding: var(--k-space-3) var(--k-space-4);
+  border-top: 1px solid var(--k-divider);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  background: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  font-family: inherit;
+
+  &:active {
+    background: var(--k-surface-muted);
+  }
+
+  &__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: var(--k-primary-soft);
+    color: var(--k-primary);
+  }
+
+  &--warm .k-row-action__icon {
+    background: var(--k-warm-soft);
+    color: var(--k-warm);
+  }
+
+  &__text {
+    flex: 1;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--k-text);
+    line-height: 1.35;
+  }
+
+  &__chevron {
+    color: var(--k-text-muted);
+  }
+}
+
+.k-alert-inline {
+  margin-top: var(--k-space-3);
+  padding: var(--k-space-3);
+  border-radius: var(--k-radius);
+  font-size: 0.8125rem;
+  font-weight: 500;
+
+  &--warn {
+    background: var(--k-zone-yellow-bg);
+    color: var(--k-zone-yellow-text);
+  }
+  &--ok {
+    background: var(--k-zone-green-bg);
+    color: var(--k-zone-green-text);
+  }
+  &--bad {
+    background: var(--k-zone-red-bg);
+    color: var(--k-zone-red-text);
+  }
+}
+
+// Шапка раздела — вплотную к панели под ней (отступ задаёт .k-page gap)
+.k-page-head {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+
+  &__row {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--k-space-2);
+  }
+
+  &__back {
+    margin: 2px 0 0 -4px;
+    flex-shrink: 0;
+    color: var(--k-text);
+  }
+
+  &__text {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 1.375rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    color: var(--k-text);
+  }
+
+  &__sub {
+    margin: 4px 0 0;
+    padding: 0;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.35;
+    color: var(--k-text-secondary);
+  }
+}

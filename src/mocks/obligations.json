@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "title": "Ипотека",
+    "type": "loan",
+    "payment_amount": 24100,
+    "payment_day": 4,
+    "remaining_amount": 3200000,
+    "total_amount": 4500000,
+    "interest_rate": 12.5,
+    "lender": "Сбербанк",
+    "note": null,
+    "is_active": true,
+    "next_payment_date": "2026-06-04",
+    "created_at": "2026-01-15T10:00:00+03:00",
+    "updated_at": "2026-05-20T10:00:00+03:00"
+  },
+  {
+    "id": 2,
+    "title": "Подписка Яндекс Плюс",
+    "type": "subscription",
+    "payment_amount": 399,
+    "payment_day": 12,
+    "remaining_amount": null,
+    "total_amount": null,
+    "interest_rate": null,
+    "lender": null,
+    "note": "Семейная",
+    "is_active": true,
+    "next_payment_date": "2026-06-12",
+    "created_at": "2026-02-01T10:00:00+03:00",
+    "updated_at": "2026-05-01T10:00:00+03:00"
+  },
+  {
+    "id": 3,
+    "title": "Долг Андрею",
+    "type": "personal_debt",
+    "payment_amount": 5000,
+    "payment_day": 20,
+    "remaining_amount": 15000,
+    "total_amount": 50000,
+    "interest_rate": null,
+    "lender": "Андрей",
+    "note": null,
+    "is_active": true,
+    "next_payment_date": "2026-06-20",
+    "created_at": "2026-03-10T10:00:00+03:00",
+    "updated_at": "2026-04-10T10:00:00+03:00"
+  }
+]
