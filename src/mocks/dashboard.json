@@ -36,5 +36,38 @@
   "streak": {
     "import_on_time": 2,
     "check_in_weeks": 2
+  },
+  "incomes": {
+    "summary": {
+      "total_this_month": 185000,
+      "count_this_month": 2,
+      "total_all_time": 420000,
+      "last_received_at": "2026-05-25"
+    },
+    "recent": [
+      {
+        "id": 1,
+        "title": "Зарплата",
+        "description": "ООО Работа",
+        "amount": 150000,
+        "received_at": "2026-05-25"
+      }
+    ]
+  },
+  "savings": {
+    "summary": {
+      "total_balance": 320000,
+      "total_monthly_contribution": 25000,
+      "accounts_count": 1
+    },
+    "accounts": [
+      {
+        "id": 1,
+        "title": "Подушка",
+        "bank": "Сбербанк",
+        "balance": 320000,
+        "monthly_contribution": 25000
+      }
+    ]
   }
 }

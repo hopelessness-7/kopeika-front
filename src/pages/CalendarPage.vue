@@ -28,13 +28,14 @@ import PageHeader from 'src/components/common/PageHeader.vue'
 import PageState from 'src/components/common/PageState.vue'
 import CalendarInteractive from 'src/components/calendar/CalendarInteractive.vue'
 
-const { formatMonthYear } = useFormatDate()
+const { formatMonthYear, toDateKey } = useFormatDate()
 
 const current = ref(new Date())
 const calendarData = ref({ days: [] })
 const loading = ref(false)
 const error = ref(null)
 const selectedKey = ref(null)
+const pendingSelectKey = ref(null)
 
 const monthLabel = computed(() => formatMonthYear(current.value))
 
@@ -46,7 +47,7 @@ const paymentsByDate = computed(() => {
   return map
 })
 
-const todayKey = computed(() => new Date().toISOString().slice(0, 10))
+const todayKey = computed(() => toDateKey(new Date()))
 
 const calendarDays = computed(() => {
   const year = current.value.getFullYear()
@@ -58,7 +59,7 @@ const calendarDays = computed(() => {
   for (let i = 0; i < 42; i++) {
     const date = new Date(start)
     date.setDate(start.getDate() + i)
-    const key = date.toISOString().slice(0, 10)
+    const key = toDateKey(date)
     const payment = paymentsByDate.value[key]
     days.push({
       key,
@@ -84,7 +85,19 @@ function selectDay (key) {
 }
 
 function jumpToDate (dateStr) {
-  selectedKey.value = dateStr
+  const [y, m] = dateStr.split('-').map(Number)
+  if (!y || !m) {
+    selectedKey.value = dateStr
+    return
+  }
+  const sameMonth =
+    current.value.getFullYear() === y && current.value.getMonth() === m - 1
+  if (sameMonth) {
+    selectedKey.value = dateStr
+    return
+  }
+  pendingSelectKey.value = dateStr
+  current.value = new Date(y, m - 1, 1)
 }
 
 watch(current, () => {
@@ -97,13 +110,19 @@ async function load () {
   error.value = null
   const year = current.value.getFullYear()
   const month = current.value.getMonth()
-  const from = new Date(year, month, 1).toISOString().slice(0, 10)
-  const to = new Date(year, month + 1, 0).toISOString().slice(0, 10)
+  const from = toDateKey(new Date(year, month, 1))
+  const to = toDateKey(new Date(year, month + 1, 0))
   try {
-    calendarData.value = await fetchCalendar(from, to)
-    const today = new Date()
-    if (today.getMonth() === month && today.getFullYear() === year) {
-      selectedKey.value = today.toISOString().slice(0, 10)
+    const data = await fetchCalendar(from, to)
+    calendarData.value = { days: data?.days ?? [] }
+    if (pendingSelectKey.value) {
+      selectedKey.value = pendingSelectKey.value
+      pendingSelectKey.value = null
+    } else {
+      const today = new Date()
+      if (today.getMonth() === month && today.getFullYear() === year) {
+        selectedKey.value = toDateKey(today)
+      }
     }
   } catch (e) {
     error.value = e.message

@@ -2,7 +2,6 @@
   <div class="cal">
     <div class="cal__layout">
     <div class="k-panel cal__panel">
-      <!-- Навигация + итог месяца -->
       <div class="k-panel__section cal__toolbar">
         <div class="cal__nav">
           <q-btn flat round dense icon="chevron_left" @click="$emit('prev-month')" />
@@ -16,7 +15,6 @@
         </div>
       </div>
 
-      <!-- Сетка -->
       <div class="k-panel__section cal__grid-wrap">
         <div class="cal__weekdays">
           <span v-for="w in weekdays" :key="w">{{ w }}</span>
@@ -44,7 +42,6 @@
         </div>
       </div>
 
-      <!-- Детали выбранного дня -->
       <div v-if="selectedKey" class="k-panel__section cal__detail">
         <div class="cal__detail-head">
           <span class="cal__detail-date">{{ selectedLabel }}</span>
@@ -69,7 +66,6 @@
       </div>
     </div>
 
-    <!-- Лента ближайших -->
     <div v-if="upcoming.length" class="cal__upcoming">
       <h3 class="cal__upcoming-title">Ближайшие платежи</h3>
       <div class="k-panel">
@@ -100,7 +96,7 @@
 import { computed } from 'vue'
 import { OBLIGATION_TYPE_LABELS } from 'src/types/api'
 import { useFormatMoney } from 'src/composables/useFormatMoney'
-import { useFormatDate } from 'src/composables/useFormatDate'
+import { parseDateKey, useFormatDate } from 'src/composables/useFormatDate'
 
 const props = defineProps({
   monthLabel: String,
@@ -140,8 +136,8 @@ const upcoming = computed(() => {
   const items = []
   for (const [date, day] of Object.entries(props.paymentsByDate)) {
     for (const ob of day.obligations || []) {
-      const d = new Date(date)
-      if (d < today) continue
+      const d = parseDateKey(date)
+      if (!d || d < today) continue
       const diff = Math.round((d - today) / 86400000)
       items.push({
         date,

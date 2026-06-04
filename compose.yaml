@@ -9,9 +9,10 @@ services:
         image: kopeika-front:dev
         ports:
             - '${FRONT_PORT:-9000}:9000'
+        env_file:
+            - .env
         environment:
             CHOKIDAR_USEPOLLING: '${CHOKIDAR_USEPOLLING:-true}'
-            API_URL: '${API_URL:-http://localhost:8080/api}'
         volumes:
             - '.:/app'
             - front_node_modules:/app/node_modules

@@ -21,7 +21,7 @@ export function applyTheme (mode) {
   try {
     localStorage.setItem(THEME_STORAGE_KEY, mode)
   } catch {
-    // private mode
+    void 0
   }
   return resolved
 }
@@ -33,7 +33,7 @@ export function initTheme () {
     const saved = localStorage.getItem(THEME_STORAGE_KEY)
     if (saved === 'light' || saved === 'system' || saved === 'dark') mode = saved
   } catch {
-    // ignore
+    void 0
   }
   return applyTheme(mode)
 }
@@ -60,7 +60,7 @@ export function getStoredThemeMode () {
     const saved = localStorage.getItem(THEME_STORAGE_KEY)
     if (saved === 'light' || saved === 'system' || saved === 'dark') return saved
   } catch {
-    // ignore
+    void 0
   }
   return 'system'
 }

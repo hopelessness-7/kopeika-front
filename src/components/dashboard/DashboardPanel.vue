@@ -1,6 +1,5 @@
 <template>
   <div class="k-panel dashboard-panel">
-    <!-- 1. Главная цифра -->
     <section
       class="k-panel__section k-panel__section--accent dashboard-panel__hero"
       :class="'k-panel__section--' + data.zone"
@@ -13,7 +12,6 @@
       <p class="k-panel__hero-meta">{{ primaryMeta }}</p>
     </section>
 
-    <!-- 2. Лимиты по якорям -->
     <section v-if="showAnchorLimits" class="k-panel__section dashboard-panel__limits">
       <div class="k-limit-pair" :class="{ 'k-limit-pair--one': anchorCount === 1 }">
         <div v-if="data.anchors.import" class="k-limit-pair__item">
@@ -34,7 +32,6 @@
       <p v-if="zoneHint" class="dashboard-panel__hint">{{ zoneHint }}</p>
     </section>
 
-    <!-- 3. Деньги на счёте -->
     <section
       class="k-panel__section dashboard-panel__money"
       :class="{ 'dashboard-panel__money--solo': !data.next_obligation }"
@@ -47,7 +44,7 @@
           @click="$emit('update-balance')"
           @keyup.enter="$emit('update-balance')"
         >
-          <div class="k-metric__label">Баланс · нажмите, чтобы изменить</div>
+          <div class="k-metric__label">Счёт · нажмите, чтобы изменить</div>
           <div class="k-metric__value">{{ formatMoney(data.balance) }}</div>
           <div class="k-metric__sub">{{ balanceUpdated }}</div>
         </div>
@@ -59,7 +56,6 @@
       </div>
     </section>
 
-    <!-- 4. Ближайший платёж -->
     <section v-if="data.next_obligation" class="k-panel__section dashboard-panel__payment">
       <p class="k-panel__label">Ближайший платёж</p>
       <p class="dashboard-panel__payment-title">{{ data.next_obligation.title }}</p>
@@ -80,7 +76,41 @@
       </div>
     </section>
 
-    <!-- 5. Действия -->
+    <section
+      v-if="data.incomes"
+      class="k-panel__section dashboard-panel__incomes"
+    >
+      <button type="button" class="dashboard-panel__link-head" @click="$emit('incomes')">
+        <p class="k-panel__label">Доходы</p>
+        <q-icon name="chevron_right" />
+      </button>
+      <p class="dashboard-panel__summary-line">
+        {{ formatMoney(data.incomes.summary.total_this_month) }} за месяц
+        <span v-if="data.incomes.summary.count_this_month">
+          · {{ data.incomes.summary.count_this_month }} пост.
+        </span>
+      </p>
+      <ul v-if="data.incomes.recent?.length" class="dashboard-panel__mini-list">
+        <li v-for="row in data.incomes.recent" :key="row.id">
+          {{ row.title }} — {{ formatMoney(row.amount) }}
+        </li>
+      </ul>
+    </section>
+
+    <section
+      v-if="data.savings"
+      class="k-panel__section dashboard-panel__savings"
+    >
+      <button type="button" class="dashboard-panel__link-head" @click="$emit('savings')">
+        <p class="k-panel__label">Накопления</p>
+        <q-icon name="chevron_right" />
+      </button>
+      <p class="dashboard-panel__summary-line">
+        {{ formatMoney(data.savings.summary.total_balance) }} на счетах
+        · +{{ formatMoney(data.savings.summary.total_monthly_contribution) }}/мес
+      </p>
+    </section>
+
     <section
       v-if="data.check_in_due || data.import_due || data.import_overdue"
       class="dashboard-panel__actions dashboard-panel__cta"
@@ -106,6 +136,14 @@
         <q-icon name="chevron_right" class="k-row-action__chevron" />
       </button>
     </section>
+
+    <section class="dashboard-panel__actions dashboard-panel__cta">
+      <button type="button" class="k-row-action" @click="$emit('settings')">
+        <span class="k-row-action__icon"><q-icon name="tune" size="20px" /></span>
+        <span class="k-row-action__text">Настройки и оформление</span>
+        <q-icon name="chevron_right" class="k-row-action__chevron" />
+      </button>
+    </section>
   </div>
 </template>
 
@@ -119,7 +157,7 @@ const props = defineProps({
   data: { type: Object, required: true }
 })
 
-defineEmits(['update-balance', 'check-in', 'import'])
+defineEmits(['update-balance', 'check-in', 'import', 'incomes', 'savings', 'settings'])
 
 const { formatMoney, formatDailyLimit } = useFormatMoney()
 const { formatDate, daysLabel } = useFormatDate()
@@ -200,5 +238,37 @@ const importCta = computed(() =>
 
 .dashboard-panel__actions {
   padding: 0;
+}
+
+.dashboard-panel__link-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0;
+  margin: 0 0 var(--k-space-2);
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+
+  .k-panel__label {
+    margin: 0;
+  }
+}
+
+.dashboard-panel__summary-line {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.dashboard-panel__mini-list {
+  margin: var(--k-space-2) 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.8125rem;
+  color: var(--k-text-secondary);
+  line-height: 1.5;
 }
 </style>

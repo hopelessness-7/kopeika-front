@@ -46,8 +46,10 @@ const isDesktop = computed(() => $q.screen.width >= 1024)
 const titles = {
   '/obligations': 'Обязательства',
   '/obligations/new': 'Новое обязательство',
+  '/incomes': 'Доходы',
+  '/savings': 'Накопления',
+  '/reconciliation': 'Сверка',
   '/calendar': 'Календарь',
-  '/import': 'Сверка',
   '/settings': 'Настройки',
   '/check-in': 'Быстрая сверка'
 }
@@ -56,7 +58,7 @@ const showTabs = computed(() => {
   const hidden = ['/check-in', '/obligations/new']
   if (hidden.includes(route.path)) return false
   if (route.path.match(/^\/obligations\/\d+\/edit$/)) return false
-  if (route.path.match(/^\/import\/\d+\/summary$/)) return false
+  if (route.path.match(/^\/reconciliation\/\d+$/)) return false
   return true
 })
 
@@ -64,17 +66,26 @@ const showBack = computed(() => !showTabs.value)
 
 const showHeader = computed(() => {
   const p = route.path
-  if (['/', '/obligations', '/calendar', '/import', '/settings', '/check-in', '/obligations/new'].includes(p)) {
-    return false
-  }
+  const noHeader = [
+    '/',
+    '/obligations',
+    '/incomes',
+    '/savings',
+    '/reconciliation',
+    '/calendar',
+    '/settings',
+    '/check-in',
+    '/obligations/new'
+  ]
+  if (noHeader.includes(p)) return false
   if (/^\/obligations\/\d+\/edit$/.test(p)) return false
-  if (/^\/import\/\d+\/summary$/.test(p)) return false
+  if (/^\/reconciliation\/\d+$/.test(p)) return false
   return true
 })
 
 const pageTitle = computed(() => {
   if (route.path.match(/^\/obligations\/\d+\/edit$/)) return 'Редактирование'
-  if (route.path.match(/^\/import\/\d+\/summary$/)) return 'Итог периода'
+  if (route.path.match(/^\/reconciliation\/\d+$/)) return 'Выписка'
   return titles[route.path] || 'Kopeika'
 })
 </script>

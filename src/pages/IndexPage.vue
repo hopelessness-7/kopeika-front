@@ -14,7 +14,10 @@
             :data="store.data"
             @update-balance="balanceDialog = true"
             @check-in="$router.push('/check-in')"
-            @import="$router.push('/import')"
+            @import="$router.push('/reconciliation')"
+            @incomes="$router.push('/incomes')"
+            @savings="$router.push('/savings')"
+            @settings="$router.push('/settings')"
           />
         </PageState>
       </q-pull-to-refresh>
@@ -23,7 +26,7 @@
     <q-dialog v-model="balanceDialog" position="bottom">
       <q-card class="k-sheet" style="min-width: 100%">
         <q-card-section>
-          <div class="text-h6">Баланс на счёте</div>
+          <div class="text-h6">Счёт</div>
           <q-input
             v-model.number="balanceInput"
             type="number"
@@ -91,7 +94,7 @@ async function saveBalance () {
   try {
     await store.setBalance(balanceInput.value)
     balanceDialog.value = false
-    $q.notify({ type: 'positive', message: 'Баланс обновлён', position: 'top' })
+    $q.notify({ type: 'positive', message: 'Счёт обновлён', position: 'top' })
   } catch (e) {
     $q.notify({ type: 'negative', message: e.message, position: 'top' })
   } finally {

@@ -1,6 +1,7 @@
 @import './tokens.scss';
 @import './layout.scss';
 @import './desktop.scss';
+@import './auth.scss';
 
 * {
   -webkit-tap-highlight-color: transparent;
@@ -20,7 +21,6 @@ body {
   background: transparent;
 }
 
-// ——— Bottom nav ———
 .k-bottom-nav {
   position: fixed;
   left: 50%;
@@ -99,7 +99,6 @@ body {
   box-shadow: none !important;
 }
 
-// ——— Forms ———
 .k-form {
   .q-field--outlined .q-field__control {
     border-radius: 12px;
@@ -128,7 +127,6 @@ body {
   }
 }
 
-// Obligations (оставляем карточки долгов)
 .k-obligation {
   display: flex;
   gap: var(--k-space-3);

@@ -13,15 +13,31 @@ const monthYearFormatter = new Intl.DateTimeFormat('ru-RU', {
   year: 'numeric'
 })
 
+export function toDateKey (date) {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
+export function parseDateKey (key) {
+  if (!key) return null
+  const [y, m, d] = key.split('-').map(Number)
+  if (!y || !m || !d) return null
+  return new Date(y, m - 1, d)
+}
+
 export function useFormatDate () {
   function formatDate (iso) {
     if (!iso) return '—'
-    return dateFormatter.format(new Date(iso))
+    const date = parseDateKey(iso) ?? new Date(iso)
+    return dateFormatter.format(date)
   }
 
   function formatShortDate (iso) {
     if (!iso) return '—'
-    return shortDateFormatter.format(new Date(iso))
+    const date = parseDateKey(iso) ?? new Date(iso)
+    return shortDateFormatter.format(date)
   }
 
   function formatMonthYear (date) {
@@ -47,6 +63,8 @@ export function useFormatDate () {
     formatShortDate,
     formatMonthYear,
     formatPeriod,
-    daysLabel
+    daysLabel,
+    toDateKey,
+    parseDateKey
   }
 }
