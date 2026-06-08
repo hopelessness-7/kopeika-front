@@ -88,6 +88,56 @@ export async function archiveObligation (id) {
   obligationsStore[index].is_active = false
 }
 
+const obligationPaymentsStore = {}
+
+export async function fetchObligationPayments (obligationId) {
+  await delay()
+  return clone(obligationPaymentsStore[obligationId] || [])
+}
+
+export async function createObligationPayment (obligationId, input) {
+  await delay()
+  const list = obligationPaymentsStore[obligationId] || []
+  const id = Math.max(0, ...list.map((p) => p.id)) + 1
+  const item = {
+    id,
+    obligation_id: Number(obligationId),
+    amount: input.amount,
+    status: input.status || 'paid',
+    paid_at: input.paid_at || new Date().toISOString(),
+    due_date: input.due_date || (input.paid_at || new Date().toISOString()).slice(0, 10),
+    note: input.note || null,
+    created_at: new Date().toISOString()
+  }
+  obligationPaymentsStore[obligationId] = [item, ...list]
+  return clone(item)
+}
+
+export async function deleteObligationPayment (obligationId, paymentId) {
+  await delay()
+  const list = obligationPaymentsStore[obligationId] || []
+  obligationPaymentsStore[obligationId] = list.filter((p) => p.id !== Number(paymentId))
+}
+
+export async function closeObligation (id) {
+  await delay()
+  const index = obligationsStore.findIndex((o) => o.id === Number(id))
+  if (index === -1) throw new Error('Обязательство не найдено')
+  obligationsStore[index].is_active = false
+  obligationsStore[index].remaining_amount = 0
+  obligationsStore[index].ends_at = new Date().toISOString().slice(0, 10)
+  return clone(obligationsStore[index])
+}
+
+export async function reopenObligation (id) {
+  await delay()
+  const index = obligationsStore.findIndex((o) => o.id === Number(id))
+  if (index === -1) throw new Error('Обязательство не найдено')
+  obligationsStore[index].is_active = true
+  obligationsStore[index].ends_at = null
+  return clone(obligationsStore[index])
+}
+
 export async function fetchCalendar (from, to) {
   await delay()
   const days = calendarMock.days.filter((d) => d.date >= from && d.date <= to)

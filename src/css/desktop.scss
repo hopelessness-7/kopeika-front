@@ -38,6 +38,8 @@
       'hero hero'
       'limits limits'
       'money payment'
+      'forecast forecast'
+      'incomes savings'
       'cta cta';
 
     .k-panel__section + .k-panel__section {
@@ -66,13 +68,31 @@
     grid-area: payment;
   }
 
+  .dashboard-panel__forecast {
+    grid-area: forecast;
+    border-top: 1px solid var(--k-divider);
+  }
+
+  .dashboard-panel__incomes {
+    grid-area: incomes;
+    border-top: 1px solid var(--k-divider);
+  }
+
+  .dashboard-panel__savings {
+    grid-area: savings;
+    border-top: 1px solid var(--k-divider);
+    border-left: 1px solid var(--k-divider);
+  }
+
   .dashboard-panel__cta {
     grid-area: cta;
   }
 
   .dashboard-panel__hero + .dashboard-panel__limits,
   .dashboard-panel__limits + .dashboard-panel__money,
-  .dashboard-panel__money + .dashboard-panel__payment {
+  .dashboard-panel__money + .dashboard-panel__payment,
+  .dashboard-panel__money + .dashboard-panel__forecast,
+  .dashboard-panel__payment + .dashboard-panel__forecast {
     border-top: 1px solid var(--k-divider);
   }
 

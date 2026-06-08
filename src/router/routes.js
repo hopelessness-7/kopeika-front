@@ -8,6 +8,10 @@ const routes = [
       { path: 'obligations', component: () => import('pages/ObligationsPage.vue') },
       { path: 'obligations/new', component: () => import('pages/ObligationFormPage.vue') },
       {
+        path: 'obligations/:id',
+        component: () => import('pages/ObligationDetailPage.vue')
+      },
+      {
         path: 'obligations/:id/edit',
         component: () => import('pages/ObligationFormPage.vue')
       },

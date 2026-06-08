@@ -56,6 +56,8 @@
       </div>
     </section>
 
+    <ForecastBlock v-if="data.forecast" :forecast="data.forecast" />
+
     <section v-if="data.next_obligation" class="k-panel__section dashboard-panel__payment">
       <p class="k-panel__label">Ближайший платёж</p>
       <p class="dashboard-panel__payment-title">{{ data.next_obligation.title }}</p>
@@ -64,6 +66,35 @@
         · через {{ daysLabel(data.next_obligation.days_until) }}
       </p>
       <div
+        v-if="data.next_obligation.progress_percent != null"
+        class="dashboard-panel__progress"
+      >
+        <div class="dashboard-panel__progress-row">
+          <span>Погашено</span>
+          <span>{{ data.next_obligation.progress_percent }}%</span>
+        </div>
+        <q-linear-progress
+          :value="data.next_obligation.progress_percent / 100"
+          size="8px"
+          rounded
+          color="primary"
+          track-color="grey-3"
+        />
+        <p
+          v-if="data.next_obligation.remaining_amount != null"
+          class="dashboard-panel__progress-meta"
+        >
+          Остаток {{ formatMoney(data.next_obligation.remaining_amount) }}
+        </p>
+      </div>
+      <div
+        v-if="data.next_obligation.needs_close"
+        class="k-alert-inline k-alert-inline--ok q-mt-sm"
+      >
+        Долг погашен — закройте в карточке обязательства
+      </div>
+      <div
+        v-else
         class="k-alert-inline"
         :class="data.next_obligation.balance_covers ? 'k-alert-inline--ok' : 'k-alert-inline--bad'"
       >
@@ -111,10 +142,7 @@
       </p>
     </section>
 
-    <section
-      v-if="data.check_in_due || data.import_due || data.import_overdue"
-      class="dashboard-panel__actions dashboard-panel__cta"
-    >
+    <section class="dashboard-panel__actions dashboard-panel__cta">
       <button
         v-if="data.check_in_due"
         type="button"
@@ -135,9 +163,6 @@
         <span class="k-row-action__text">{{ importCta }}</span>
         <q-icon name="chevron_right" class="k-row-action__chevron" />
       </button>
-    </section>
-
-    <section class="dashboard-panel__actions dashboard-panel__cta">
       <button type="button" class="k-row-action" @click="$emit('settings')">
         <span class="k-row-action__icon"><q-icon name="tune" size="20px" /></span>
         <span class="k-row-action__text">Настройки и оформление</span>
@@ -152,6 +177,7 @@ import { computed } from 'vue'
 import { ZONE_LABELS } from 'src/types/api'
 import { useFormatMoney } from 'src/composables/useFormatMoney'
 import { useFormatDate } from 'src/composables/useFormatDate'
+import ForecastBlock from 'src/components/dashboard/ForecastBlock.vue'
 
 const props = defineProps({
   data: { type: Object, required: true }
@@ -233,6 +259,24 @@ const importCta = computed(() =>
 .dashboard-panel__payment-meta {
   margin: var(--k-space-1) 0 0;
   font-size: 0.875rem;
+  color: var(--k-text-secondary);
+}
+
+.dashboard-panel__progress {
+  margin-top: var(--k-space-3);
+}
+
+.dashboard-panel__progress-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8125rem;
+  color: var(--k-text-secondary);
+  margin-bottom: 4px;
+}
+
+.dashboard-panel__progress-meta {
+  margin: 4px 0 0;
+  font-size: 0.8125rem;
   color: var(--k-text-secondary);
 }
 

@@ -50,7 +50,28 @@
               dense
               :rules="[required, positive]"
             />
-            <q-input v-model="form.received_at" type="date" label="Дата *" outlined dense :rules="[required]" />
+            <q-toggle
+              v-model="form.is_recurring"
+              label="Регулярный (ежемесячно)"
+              color="primary"
+            />
+            <q-input
+              v-if="form.is_recurring"
+              v-model.number="form.day_of_month"
+              type="number"
+              label="День месяца (1–31) *"
+              outlined
+              dense
+              :rules="[required, dayRule]"
+            />
+            <q-input
+              v-model="form.received_at"
+              type="date"
+              :label="form.is_recurring ? 'Дата последнего поступления' : 'Дата *'"
+              outlined
+              dense
+              :rules="form.is_recurring ? [] : [required]"
+            />
             <q-btn
               type="submit"
               unelevated
@@ -100,13 +121,16 @@ const emptyForm = () => ({
   title: '',
   description: '',
   amount: null,
-  received_at: new Date().toISOString().slice(0, 10)
+  received_at: new Date().toISOString().slice(0, 10),
+  is_recurring: false,
+  day_of_month: null
 })
 
 const form = ref(emptyForm())
 
 const required = (v) => (v !== null && v !== undefined && String(v).trim() !== '') || 'Обязательное поле'
 const positive = (v) => (v > 0) || 'Больше нуля'
+const dayRule = (v) => (v >= 1 && v <= 31) || 'От 1 до 31'
 
 onMounted(() => store.load())
 
@@ -124,7 +148,9 @@ async function openEdit (id) {
       title: item.title,
       description: item.description || '',
       amount: item.amount,
-      received_at: item.received_at
+      received_at: item.received_at,
+      is_recurring: Boolean(item.is_recurring),
+      day_of_month: item.day_of_month ?? null
     }
     formOpen.value = true
   } catch (e) {
@@ -139,7 +165,9 @@ async function onSubmit () {
       title: form.value.title.trim(),
       description: form.value.description?.trim() || null,
       amount: form.value.amount,
-      received_at: form.value.received_at
+      received_at: form.value.received_at || new Date().toISOString().slice(0, 10),
+      is_recurring: form.value.is_recurring,
+      day_of_month: form.value.is_recurring ? form.value.day_of_month : null
     }
     if (editingId.value) {
       await store.update(editingId.value, payload)

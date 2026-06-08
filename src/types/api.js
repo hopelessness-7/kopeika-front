@@ -4,6 +4,7 @@
  * @typedef {'auto' | 'salary' | 'import'} PrimaryAnchor
  * @typedef {'quiet' | 'normal' | 'payments_only'} NotificationMode
  * @typedef {'loan' | 'installment' | 'personal_debt' | 'rent' | 'subscription' | 'other'} ObligationType
+ * @typedef {'planned' | 'paid' | 'skipped'} ObligationPaymentStatus
  * @typedef {'sber' | 'yandex_pay'} BankId
  * @typedef {'processing' | 'completed' | 'failed'} ImportStatus
  *
@@ -59,6 +60,16 @@ export const OBLIGATION_TYPES = /** @type {const} */ ([
   'subscription',
   'other'
 ])
+
+export const DEBT_OBLIGATION_TYPES = /** @type {const} */ ([
+  'loan',
+  'installment',
+  'personal_debt'
+])
+
+export function isDebt (type) {
+  return DEBT_OBLIGATION_TYPES.includes(type)
+}
 
 /** @type {Record<import('./api.js').ObligationType, string>} */
 export const OBLIGATION_TYPE_LABELS = {

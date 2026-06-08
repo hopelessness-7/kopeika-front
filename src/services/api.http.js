@@ -36,8 +36,33 @@ export async function fetchObligations () {
   return unwrapList(data)
 }
 
-export async function fetchObligation (id) {
-  const { data } = await api.get(`/obligations/${id}`)
+export async function fetchObligation (id, { withSummary = false } = {}) {
+  const params = withSummary ? { with_summary: 1 } : undefined
+  const { data } = await api.get(`/obligations/${id}`, { params })
+  return unwrapOne(data)
+}
+
+export async function fetchObligationPayments (obligationId) {
+  const { data } = await api.get(`/obligations/${obligationId}/payments`)
+  return unwrapList(data)
+}
+
+export async function createObligationPayment (obligationId, input) {
+  const { data } = await api.post(`/obligations/${obligationId}/payments`, input)
+  return unwrapOne(data)
+}
+
+export async function deleteObligationPayment (obligationId, paymentId) {
+  await api.delete(`/obligations/${obligationId}/payments/${paymentId}`)
+}
+
+export async function closeObligation (obligationId) {
+  const { data } = await api.post(`/obligations/${obligationId}/close`)
+  return unwrapOne(data)
+}
+
+export async function reopenObligation (obligationId) {
+  const { data } = await api.post(`/obligations/${obligationId}/reopen`)
   return unwrapOne(data)
 }
 

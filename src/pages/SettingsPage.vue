@@ -1,9 +1,9 @@
 <template>
-  <q-page class="k-page">
+  <q-page class="k-page k-page--wide">
     <PageHeader title="Настройки" subtitle="Оформление и аккаунт" />
 
     <div class="k-page-body">
-      <div class="k-panel">
+      <div class="k-panel k-settings-grid">
         <AuthAccountSection />
         <ThemeSection />
       </div>
