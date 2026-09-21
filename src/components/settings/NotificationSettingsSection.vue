@@ -53,7 +53,8 @@ import { registerPushSubscription, unregisterPushSubscription } from 'src/servic
 import {
   getVapidPublicKey,
   isWebPushSupported,
-  urlBase64ToUint8Array
+  urlBase64ToUint8Array,
+  waitForActiveServiceWorker
 } from 'src/utils/push'
 
 const $q = useQuasar()
@@ -119,7 +120,7 @@ watch(
 
 async function refreshSubscriptionState () {
   try {
-    const reg = await navigator.serviceWorker.ready
+    const reg = await waitForActiveServiceWorker(5000)
     const sub = await reg.pushManager.getSubscription()
     pushEnabled.value = Boolean(sub)
   } catch {
@@ -141,21 +142,31 @@ function pushErrorMessage (error) {
   if (/permission|разрешен/i.test(msg) || permission.value === 'denied') {
     return 'Разрешение на уведомления не получено'
   }
-  if (/applicationServerKey|InvalidAccessError|not a valid/i.test(msg)) {
-    return 'Некорректный VAPID-ключ. Проверьте VITE_VAPID_PUBLIC_KEY.'
+  if (/VAPID|applicationServerKey|InvalidAccessError|not a valid|base64/i.test(msg)) {
+    return 'Некорректный VAPID-ключ. Проверьте VITE_VAPID_PUBLIC_KEY и перезапустите dev-сервер.'
   }
-  if (/service worker|registration/i.test(msg)) {
-    return 'Service Worker ещё не готов. Обновите страницу и попробуйте снова.'
+  if (/service worker|не активен|registration/i.test(msg)) {
+    return msg.includes('Service Worker')
+      ? msg
+      : 'Service Worker ещё не готов. Обновите страницу и попробуйте снова.'
+  }
+  if (error?.status === 419) {
+    return 'Сессия устарела (CSRF). Обновите страницу и войдите снова.'
+  }
+  if (error?.code === 'ECONNABORTED' || /timeout/i.test(msg)) {
+    return 'Сервер не ответил вовремя. Проверьте, что бэкенд запущен.'
   }
   return msg || 'Не удалось изменить push-подписку'
 }
 
 async function togglePush () {
-  if (!pushSupported.value) return
+  if (!pushSupported.value || pushLoading.value) return
   pushLoading.value = true
   try {
+    // Resolve SW before permission / subscribe — `.ready` hangs forever without an active worker.
+    const reg = await waitForActiveServiceWorker()
+
     if (pushEnabled.value) {
-      const reg = await navigator.serviceWorker.ready
       const sub = await reg.pushManager.getSubscription()
       if (sub) {
         try {
@@ -175,16 +186,17 @@ async function togglePush () {
       throw new Error('Не задан VITE_VAPID_PUBLIC_KEY')
     }
 
+    const applicationServerKey = urlBase64ToUint8Array(vapidKey)
+
     const nextPermission = await Notification.requestPermission()
     permission.value = nextPermission
     if (nextPermission !== 'granted') {
       throw new Error('Разрешение на уведомления не получено')
     }
 
-    const reg = await navigator.serviceWorker.ready
     const sub = await reg.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(vapidKey)
+      applicationServerKey
     })
     const json = sub.toJSON()
     if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) {
