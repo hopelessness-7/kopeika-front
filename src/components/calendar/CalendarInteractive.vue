@@ -7,8 +7,9 @@
           <q-btn flat round dense icon="chevron_left" @click="$emit('prev-month')" />
           <div>
             <div class="cal__month">{{ monthLabel }}</div>
-            <div v-if="monthTotal > 0" class="cal__month-total">
-              Платежи в месяце: {{ formatMoney(monthTotal) }}
+            <div v-if="monthObligationTotal > 0 || monthIncomeTotal > 0" class="cal__month-total">
+              <span v-if="monthObligationTotal > 0">Платежи: {{ formatMoney(monthObligationTotal) }}</span>
+              <span v-if="monthIncomeTotal > 0"> · Доходы: {{ formatMoney(monthIncomeTotal) }}</span>
             </div>
           </div>
           <q-btn flat round dense icon="chevron_right" @click="$emit('next-month')" />
@@ -27,7 +28,8 @@
             class="cal__cell"
             :class="{
               'cal__cell--off': !day.inMonth,
-              'cal__cell--pay': day.total > 0,
+              'cal__cell--pay': day.obligationTotal > 0,
+              'cal__cell--income': day.incomeTotal > 0,
               'cal__cell--selected': day.key === selectedKey,
               'cal__cell--today': day.isToday
             }"
@@ -35,8 +37,9 @@
             @click="onSelect(day)"
           >
             <span class="cal__cell-day">{{ day.date.getDate() }}</span>
-            <span v-if="day.total > 0 && day.inMonth" class="cal__cell-sum">
-              {{ formatShortAmount(day.total) }}
+            <span v-if="day.inMonth && (day.obligationTotal > 0 || day.incomeTotal > 0)" class="cal__cell-sum">
+              <span v-if="day.incomeTotal > 0" class="cal__cell-sum--in">+{{ formatShortAmount(day.incomeTotal) }}</span>
+              <span v-if="day.obligationTotal > 0" class="cal__cell-sum--out">−{{ formatShortAmount(day.obligationTotal) }}</span>
             </span>
           </button>
         </div>
@@ -48,33 +51,53 @@
           <span v-if="selectedTotal" class="cal__detail-total">{{ formatMoney(selectedTotal) }}</span>
         </div>
 
+        <div v-if="selectedIncomes.length" class="cal__payments">
+          <p class="cal__detail-section">Доходы</p>
+          <button
+            v-for="inc in selectedIncomes"
+            :key="'in-' + inc.id"
+            type="button"
+            class="cal__payment-row cal__payment-row--link"
+            @click="goToIncome(inc.id)"
+          >
+            <div class="cal__payment-dot cal__payment-dot--income" />
+            <div class="cal__payment-body">
+              <div class="cal__payment-title">{{ inc.title }}</div>
+              <div class="cal__payment-type">{{ inc.recurring ? 'регулярно' : 'разово' }}</div>
+            </div>
+            <div class="cal__payment-amount cal__payment-amount--in">+{{ formatMoney(inc.amount) }}</div>
+          </button>
+        </div>
         <div v-if="selectedPayments.length" class="cal__payments">
-          <div
+          <p class="cal__detail-section">Платежи</p>
+          <button
             v-for="ob in selectedPayments"
-            :key="ob.id"
-            class="cal__payment-row"
+            :key="'ob-' + ob.id"
+            type="button"
+            class="cal__payment-row cal__payment-row--link"
+            @click="goToObligation(ob.id)"
           >
             <div class="cal__payment-dot" />
             <div class="cal__payment-body">
               <div class="cal__payment-title">{{ ob.title }}</div>
               <div class="cal__payment-type">{{ typeLabel(ob.type) }}</div>
             </div>
-            <div class="cal__payment-amount">{{ formatMoney(ob.amount) }}</div>
-          </div>
+            <div class="cal__payment-amount">−{{ formatMoney(ob.amount) }}</div>
+          </button>
         </div>
-        <p v-else class="cal__empty">В этот день платежей нет</p>
+        <p v-if="!selectedPayments.length && !selectedIncomes.length" class="cal__empty">В этот день событий нет</p>
       </div>
     </div>
 
     <div v-if="upcoming.length" class="cal__upcoming">
-      <h3 class="cal__upcoming-title">Ближайшие платежи</h3>
+      <h3 class="cal__upcoming-title">Ближайшие события</h3>
       <div class="k-panel">
         <button
           v-for="item in upcoming"
           :key="item.date + item.id"
           type="button"
           class="cal__upcoming-row"
-          @click="$emit('select-date', item.date)"
+          @click="onUpcomingClick(item)"
         >
           <div class="cal__upcoming-date">
             <span class="cal__upcoming-day">{{ item.dayNum }}</span>
@@ -84,7 +107,12 @@
             <div class="cal__upcoming-name">{{ item.title }}</div>
             <div class="cal__upcoming-meta">{{ item.daysUntil }}</div>
           </div>
-          <div class="cal__upcoming-sum">{{ formatMoney(item.amount) }}</div>
+          <div
+            class="cal__upcoming-sum"
+            :class="item.kind === 'income' ? 'cal__upcoming-sum--in' : ''"
+          >
+            {{ item.kind === 'income' ? '+' : '−' }}{{ formatMoney(item.amount) }}
+          </div>
         </button>
       </div>
     </div>
@@ -94,9 +122,12 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { OBLIGATION_TYPE_LABELS } from 'src/types/api'
 import { useFormatMoney } from 'src/composables/useFormatMoney'
 import { parseDateKey, useFormatDate } from 'src/composables/useFormatDate'
+
+const router = useRouter()
 
 const props = defineProps({
   monthLabel: String,
@@ -113,10 +144,18 @@ const { formatShortDate } = useFormatDate()
 
 const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
 
-const monthTotal = computed(() => {
+const monthObligationTotal = computed(() => {
   let sum = 0
   for (const day of Object.values(props.paymentsByDate)) {
-    sum += day.total || 0
+    sum += day.obligation_total || day.total || 0
+  }
+  return sum
+})
+
+const monthIncomeTotal = computed(() => {
+  let sum = 0
+  for (const day of Object.values(props.paymentsByDate)) {
+    sum += day.income_total || 0
   }
   return sum
 })
@@ -125,7 +164,12 @@ const selectedDayData = computed(() =>
   props.selectedKey ? props.paymentsByDate[props.selectedKey] : null
 )
 const selectedPayments = computed(() => selectedDayData.value?.obligations || [])
-const selectedTotal = computed(() => selectedDayData.value?.total || 0)
+const selectedIncomes = computed(() => selectedDayData.value?.incomes || [])
+const selectedTotal = computed(() => {
+  const day = selectedDayData.value
+  if (!day) return 0
+  return (day.obligation_total || day.total || 0) - (day.income_total || 0)
+})
 const selectedLabel = computed(() =>
   props.selectedKey ? formatShortDate(props.selectedKey) : ''
 )
@@ -135,18 +179,32 @@ const upcoming = computed(() => {
   today.setHours(0, 0, 0, 0)
   const items = []
   for (const [date, day] of Object.entries(props.paymentsByDate)) {
+    const d = parseDateKey(date)
+    if (!d || d < today) continue
+    const diff = Math.round((d - today) / 86400000)
+    const meta = diff === 0 ? 'сегодня' : diff === 1 ? 'завтра' : `через ${diff} дн.`
     for (const ob of day.obligations || []) {
-      const d = parseDateKey(date)
-      if (!d || d < today) continue
-      const diff = Math.round((d - today) / 86400000)
       items.push({
         date,
         id: ob.id,
+        kind: 'obligation',
         title: ob.title,
         amount: ob.amount,
         dayNum: d.getDate(),
         monthShort: d.toLocaleDateString('ru-RU', { month: 'short' }),
-        daysUntil: diff === 0 ? 'сегодня' : diff === 1 ? 'завтра' : `через ${diff} дн.`
+        daysUntil: meta
+      })
+    }
+    for (const inc of day.incomes || []) {
+      items.push({
+        date,
+        id: inc.id,
+        kind: 'income',
+        title: inc.title,
+        amount: inc.amount,
+        dayNum: d.getDate(),
+        monthShort: d.toLocaleDateString('ru-RU', { month: 'short' }),
+        daysUntil: meta
       })
     }
   }
@@ -165,6 +223,23 @@ function formatShortAmount (n) {
 function onSelect (day) {
   if (!day.inMonth) return
   emit('select', day.key)
+}
+
+function goToObligation (id) {
+  router.push(`/obligations/${id}`)
+}
+
+function goToIncome (id) {
+  router.push({ path: '/incomes', query: { highlight: id } })
+}
+
+function onUpcomingClick (item) {
+  emit('select-date', item.date)
+  if (item.kind === 'income') {
+    goToIncome(item.id)
+  } else {
+    goToObligation(item.id)
+  }
 }
 </script>
 
@@ -243,7 +318,11 @@ function onSelect (day) {
   }
 
   &--pay:not(&--selected) {
-    background: var(--k-primary-soft);
+    background: rgba(244, 63, 94, 0.1);
+  }
+
+  &--income:not(&--selected) {
+    background: rgba(34, 197, 94, 0.1);
   }
 
   &--today:not(&--selected) .cal__cell-day {
@@ -274,10 +353,54 @@ function onSelect (day) {
 }
 
 .cal__cell-sum {
+  display: flex;
+  flex-direction: column;
   font-size: 0.5625rem;
   font-weight: 700;
-  color: var(--k-primary);
-  line-height: 1;
+  line-height: 1.1;
+
+  &--in {
+    color: var(--q-positive);
+  }
+
+  &--out {
+    color: var(--q-negative);
+  }
+}
+
+.cal__detail-section {
+  margin: 0 0 var(--k-space-2);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--k-text-muted);
+}
+
+.cal__payment-row--link {
+  width: 100%;
+  border: none;
+  background: none;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  padding: 0;
+
+  &:hover .cal__payment-title {
+    color: var(--k-primary);
+  }
+}
+
+.cal__payment-dot--income {
+  background: var(--q-positive);
+}
+
+.cal__payment-amount--in {
+  color: var(--q-positive);
+}
+
+.cal__upcoming-sum--in {
+  color: var(--q-positive);
 }
 
 .cal__detail-head {

@@ -4,22 +4,29 @@
   "zone": "yellow",
   "free_after_obligations": 12400,
   "anchors": {
-    "primary": "import",
-    "salary": {
-      "day_of_month": 25,
-      "next_date": "2026-06-25",
-      "days_remaining": 12,
-      "daily_limit": 1620
-    },
-    "import": {
-      "interval_days": 10,
-      "last_import_at": "2026-05-22",
-      "next_due_at": "2026-06-01",
-      "days_remaining": 4,
-      "daily_limit": 1450
-    }
+    "primary_income_id": 2,
+    "items": [
+      {
+        "income_id": 1,
+        "title": "Аванс",
+        "day_of_month": 10,
+        "next_date": "2026-06-10",
+        "days_remaining": 4,
+        "daily_limit": 1200,
+        "free_after_obligations": 4800
+      },
+      {
+        "income_id": 2,
+        "title": "Зарплата",
+        "day_of_month": 25,
+        "next_date": "2026-06-25",
+        "days_remaining": 17,
+        "daily_limit": 1620,
+        "free_after_obligations": 27540
+      }
+    ]
   },
-  "primary_daily_limit": 1450,
+  "primary_daily_limit": 1200,
   "next_obligation": {
     "id": 1,
     "title": "Ипотека",
@@ -29,13 +36,88 @@
     "balance_covers": false,
     "shortfall": 2300
   },
-  "obligations_until_salary_total": 9400,
+  "obligations_until_primary_anchor_total": 9400,
+  "notification_mode": "normal",
   "check_in_due": true,
-  "import_due": false,
-  "import_overdue": false,
   "streak": {
-    "import_on_time": 2,
     "check_in_weeks": 2
+  },
+  "goals": {
+    "active_count": 1,
+    "items": [
+      {
+        "id": 1,
+        "title": "Ноутбук",
+        "target_amount": 120000,
+        "saved_amount": 35000,
+        "target_date": "2027-02-08",
+        "plan": {
+          "goal_id": 1,
+          "remaining": 85000,
+          "progress_percent": 29,
+          "is_complete": false,
+          "comfortable": {
+            "monthly_amount": 1800,
+            "months_to_goal": 48
+          },
+          "faster": {
+            "monthly_amount": 3600,
+            "months_to_goal": 24
+          },
+          "target_date_plan": null
+        }
+      }
+    ]
+  },
+  "forecast": {
+    "horizon_until": "2026-07-08",
+    "next_income": {
+      "date": "2026-06-10",
+      "title": "Аванс",
+      "amount": 40000,
+      "recurring": true,
+      "days_until": 4
+    },
+    "next_obligation_coverage": {
+      "due_date": "2026-06-04",
+      "amount": 24100,
+      "expected_balance_at_due": 21800,
+      "expected_incomes_total": 0,
+      "covers": false,
+      "shortfall": 2300
+    },
+    "debt_payoff": [
+      {
+        "obligation_id": 1,
+        "title": "Ипотека",
+        "type": "loan",
+        "remaining": 2500000,
+        "payment": 24100,
+        "interest_rate": 12,
+        "never_closes": false,
+        "months_to_close": 180,
+        "expected_close_at": "2041-06-08",
+        "total_to_pay": 4338000,
+        "total_interest": 1838000,
+        "min_payment_to_close": null
+      }
+    ],
+    "timeline": [
+      {
+        "date": "2026-06-04",
+        "kind": "obligation",
+        "title": "Ипотека",
+        "amount": 24100,
+        "running_balance": -2300
+      },
+      {
+        "date": "2026-06-10",
+        "kind": "income",
+        "title": "Аванс",
+        "amount": 40000,
+        "running_balance": 37700
+      }
+    ]
   },
   "incomes": {
     "summary": {

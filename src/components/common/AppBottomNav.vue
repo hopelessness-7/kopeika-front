@@ -23,14 +23,12 @@ const items = [
   { name: 'obligations', to: '/obligations', icon: 'account_balance_wallet', label: 'Долги' },
   { name: 'calendar', to: '/calendar', icon: 'calendar_month', label: 'Календарь' },
   { name: 'incomes', to: '/incomes', icon: 'payments', label: 'Доходы' },
-  { name: 'savings', to: '/savings', icon: 'savings', label: 'Накопления' },
-  { name: 'reconciliation', to: '/reconciliation', icon: 'upload_file', label: 'Сверка' }
+  { name: 'settings', to: '/settings', icon: 'tune', label: 'Настройки' }
 ]
 
 function isActive (item) {
   if (item.name === 'home') return route.path === '/'
   if (item.name === 'obligations') return route.path.startsWith('/obligations')
-  if (item.name === 'reconciliation') return route.path.startsWith('/reconciliation')
   if (item.name === 'calendar') return route.path.startsWith('/calendar')
   return route.path.startsWith(item.to)
 }

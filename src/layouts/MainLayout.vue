@@ -47,18 +47,17 @@ const titles = {
   '/obligations': 'Обязательства',
   '/obligations/new': 'Новое обязательство',
   '/incomes': 'Доходы',
+  '/goals': 'Цели',
   '/savings': 'Накопления',
-  '/reconciliation': 'Сверка',
   '/calendar': 'Календарь',
   '/settings': 'Настройки',
-  '/check-in': 'Быстрая сверка'
+  '/check-in': 'Уточнение баланса'
 }
 
 const showTabs = computed(() => {
   const hidden = ['/check-in', '/obligations/new']
   if (hidden.includes(route.path)) return false
   if (route.path.match(/^\/obligations\/\d+\/edit$/)) return false
-  if (route.path.match(/^\/reconciliation\/\d+$/)) return false
   return true
 })
 
@@ -70,8 +69,8 @@ const showHeader = computed(() => {
     '/',
     '/obligations',
     '/incomes',
+    '/goals',
     '/savings',
-    '/reconciliation',
     '/calendar',
     '/settings',
     '/check-in',
@@ -79,13 +78,11 @@ const showHeader = computed(() => {
   ]
   if (noHeader.includes(p)) return false
   if (/^\/obligations\/\d+\/edit$/.test(p)) return false
-  if (/^\/reconciliation\/\d+$/.test(p)) return false
   return true
 })
 
 const pageTitle = computed(() => {
   if (route.path.match(/^\/obligations\/\d+\/edit$/)) return 'Редактирование'
-  if (route.path.match(/^\/reconciliation\/\d+$/)) return 'Выписка'
   return titles[route.path] || 'Kopeika'
 })
 </script>

@@ -1,5 +1,7 @@
 <template>
   <div class="k-panel dashboard-panel">
+    <DashboardReminders v-if="data.notification_mode" :data="data" />
+
     <section
       class="k-panel__section k-panel__section--accent dashboard-panel__hero"
       :class="'k-panel__section--' + data.zone"
@@ -10,26 +12,15 @@
       </div>
       <p class="k-panel__hero-value">{{ formatDailyLimit(data.primary_daily_limit) }}</p>
       <p class="k-panel__hero-meta">{{ primaryMeta }}</p>
-    </section>
-
-    <section v-if="showAnchorLimits" class="k-panel__section dashboard-panel__limits">
-      <div class="k-limit-pair" :class="{ 'k-limit-pair--one': anchorCount === 1 }">
-        <div v-if="data.anchors.import" class="k-limit-pair__item">
-          <div class="k-limit-pair__name">До сверки</div>
-          <div class="k-limit-pair__value">
-            {{ formatDailyLimit(data.anchors.import.daily_limit) }}
-          </div>
-          <div class="k-limit-pair__days">{{ daysLabel(data.anchors.import.days_remaining) }}</div>
-        </div>
-        <div v-if="data.anchors.salary" class="k-limit-pair__item">
-          <div class="k-limit-pair__name">До зарплаты</div>
-          <div class="k-limit-pair__value">
-            {{ formatDailyLimit(data.anchors.salary.daily_limit) }}
-          </div>
-          <div class="k-limit-pair__days">{{ daysLabel(data.anchors.salary.days_remaining) }}</div>
-        </div>
-      </div>
-      <p v-if="zoneHint" class="dashboard-panel__hint">{{ zoneHint }}</p>
+      <ul v-if="anchorItems.length > 1" class="dashboard-panel__anchors">
+        <li v-for="anchor in anchorItems" :key="anchor.income_id">
+          {{ anchor.title }} · {{ formatDailyLimit(anchor.daily_limit) }}/день
+          · {{ daysLabel(anchor.days_remaining) }}
+        </li>
+      </ul>
+      <p v-if="streakWeeks" class="dashboard-panel__streak">
+        {{ streakLabel }}
+      </p>
     </section>
 
     <section
@@ -51,12 +42,18 @@
         <div class="k-metric">
           <div class="k-metric__label">Свободно после платежей</div>
           <div class="k-metric__value">{{ formatMoney(data.free_after_obligations) }}</div>
-          <div v-if="salaryDate" class="k-metric__sub">до {{ salaryDate }}</div>
+          <div v-if="primaryAnchorDate" class="k-metric__sub">до {{ primaryAnchorDate }}</div>
         </div>
       </div>
     </section>
 
     <ForecastBlock v-if="data.forecast" :forecast="data.forecast" />
+
+    <GoalsSnippet
+      v-if="data.goals"
+      :goals="data.goals"
+      @goals="$emit('goals')"
+    />
 
     <section v-if="data.next_obligation" class="k-panel__section dashboard-panel__payment">
       <p class="k-panel__label">Ближайший платёж</p>
@@ -153,19 +150,9 @@
         <span class="k-row-action__text">Уточнить баланс · 30 сек</span>
         <q-icon name="chevron_right" class="k-row-action__chevron" />
       </button>
-      <button
-        v-if="data.import_due || data.import_overdue"
-        type="button"
-        class="k-row-action k-row-action--warm"
-        @click="$emit('import')"
-      >
-        <span class="k-row-action__icon"><q-icon name="upload_file" size="20px" /></span>
-        <span class="k-row-action__text">{{ importCta }}</span>
-        <q-icon name="chevron_right" class="k-row-action__chevron" />
-      </button>
       <button type="button" class="k-row-action" @click="$emit('settings')">
         <span class="k-row-action__icon"><q-icon name="tune" size="20px" /></span>
-        <span class="k-row-action__text">Настройки и оформление</span>
+        <span class="k-row-action__text">Настройки</span>
         <q-icon name="chevron_right" class="k-row-action__chevron" />
       </button>
     </section>
@@ -174,16 +161,17 @@
 
 <script setup>
 import { computed } from 'vue'
-import { ZONE_LABELS } from 'src/types/api'
 import { useFormatMoney } from 'src/composables/useFormatMoney'
 import { useFormatDate } from 'src/composables/useFormatDate'
 import ForecastBlock from 'src/components/dashboard/ForecastBlock.vue'
+import DashboardReminders from 'src/components/dashboard/DashboardReminders.vue'
+import GoalsSnippet from 'src/components/dashboard/GoalsSnippet.vue'
 
 const props = defineProps({
   data: { type: Object, required: true }
 })
 
-defineEmits(['update-balance', 'check-in', 'import', 'incomes', 'savings', 'settings'])
+defineEmits(['update-balance', 'check-in', 'incomes', 'savings', 'settings', 'goals'])
 
 const { formatMoney, formatDailyLimit } = useFormatMoney()
 const { formatDate, daysLabel } = useFormatDate()
@@ -193,44 +181,44 @@ const zoneShort = computed(() => {
   return m[props.data.zone] || props.data.zone
 })
 
-const zoneHint = computed(() =>
-  props.data.zone !== 'green' ? ZONE_LABELS[props.data.zone] : null
-)
+const anchorItems = computed(() => props.data.anchors?.items || [])
+
+const primaryAnchor = computed(() => {
+  const id = props.data.anchors?.primary_income_id
+  return anchorItems.value.find((a) => a.income_id === id) || anchorItems.value[0] || null
+})
 
 const primaryMeta = computed(() => {
-  const anchor =
-    props.data.anchors.primary === 'import'
-      ? props.data.anchors.import
-      : props.data.anchors.salary
-  if (!anchor) return ''
-  const kind = props.data.anchors.primary === 'import' ? 'сверки' : 'зарплаты'
-  return `Основной расчёт до ${kind} · ${daysLabel(anchor.days_remaining)}`
+  if (!primaryAnchor.value) {
+    return 'Настройте доходы-якоря в разделе «Доходы»'
+  }
+  return `До «${primaryAnchor.value.title}» · ${daysLabel(primaryAnchor.value.days_remaining)}`
 })
 
-const showAnchorLimits = computed(
-  () => props.data.anchors?.import || props.data.anchors?.salary
-)
-
-const anchorCount = computed(() => {
-  let n = 0
-  if (props.data.anchors?.import) n++
-  if (props.data.anchors?.salary) n++
-  return n
-})
-
-const salaryDate = computed(() => {
-  const d = props.data.anchors?.salary?.next_date
+const primaryAnchorDate = computed(() => {
+  const d = primaryAnchor.value?.next_date
   return d ? formatDate(d) : null
+})
+
+const streakWeeks = computed(() => props.data.streak?.check_in_weeks ?? 0)
+
+const streakLabel = computed(() => {
+  const n = streakWeeks.value
+  if (!n) return ''
+  const mod10 = n % 10
+  const mod100 = n % 100
+  let word = 'недель'
+  if (mod100 < 11 || mod100 > 14) {
+    if (mod10 === 1) word = 'неделя'
+    else if (mod10 >= 2 && mod10 <= 4) word = 'недели'
+  }
+  return `${n} ${word} сверок подряд`
 })
 
 const balanceUpdated = computed(() => {
   const at = props.data.balance_updated_at
   return at ? formatDate(at) : 'ещё не обновляли'
 })
-
-const importCta = computed(() =>
-  props.data.import_overdue ? 'Загрузить выписку' : 'Подготовить сверку'
-)
 </script>
 
 <style scoped lang="scss">
@@ -242,11 +230,18 @@ const importCta = computed(() =>
   margin-bottom: var(--k-space-1);
 }
 
-.dashboard-panel__hint {
-  margin: var(--k-space-3) 0 0;
+.dashboard-panel__anchors {
+  margin: var(--k-space-2) 0 0;
+  padding-left: 1.1rem;
   font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.85);
   line-height: 1.45;
-  color: var(--k-text-secondary);
+}
+
+.dashboard-panel__streak {
+  margin: var(--k-space-2) 0 0;
+  font-size: 0.8125rem;
+  opacity: 0.9;
 }
 
 .dashboard-panel__payment-title {

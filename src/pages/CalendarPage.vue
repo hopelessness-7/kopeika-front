@@ -1,6 +1,6 @@
 <template>
   <q-page class="k-page k-page--wide">
-    <PageHeader title="Календарь" subtitle="Платежи по дням месяца" />
+    <PageHeader title="Календарь" subtitle="Доходы и платежи по дням месяца" />
 
     <div class="k-page-body">
       <PageState :loading="loading" :error="error" :retry="load">
@@ -22,12 +22,14 @@
 
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { fetchCalendar } from 'src/services/api'
 import { useFormatDate } from 'src/composables/useFormatDate'
 import PageHeader from 'src/components/common/PageHeader.vue'
 import PageState from 'src/components/common/PageState.vue'
 import CalendarInteractive from 'src/components/calendar/CalendarInteractive.vue'
 
+const route = useRoute()
 const { formatMonthYear, toDateKey } = useFormatDate()
 
 const current = ref(new Date())
@@ -65,7 +67,8 @@ const calendarDays = computed(() => {
       key,
       date,
       inMonth: date.getMonth() === month,
-      total: payment?.total || 0,
+      obligationTotal: payment?.obligation_total || payment?.total || 0,
+      incomeTotal: payment?.income_total || 0,
       isToday: key === todayKey.value
     })
   }
@@ -131,5 +134,10 @@ async function load () {
   }
 }
 
-onMounted(load)
+onMounted(async () => {
+  if (route.query.date) {
+    jumpToDate(String(route.query.date))
+  }
+  await load()
+})
 </script>

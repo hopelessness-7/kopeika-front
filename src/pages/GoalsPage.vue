@@ -1,24 +1,43 @@
 <template>
   <q-page class="k-page k-page--list">
-    <PageHeader title="Доходы" subtitle="Источники и поступления" />
+    <PageHeader title="Цели" subtitle="Накопления на покупки" />
 
     <div class="k-page-body">
       <PageState
         :loading="store.loading && !store.items.length"
         :error="store.error"
         :empty="!store.loading && !store.items.length"
-        empty-text="Добавьте первый доход"
-        empty-icon="payments"
+        empty-text="Добавьте первую цель"
+        empty-icon="flag"
         :retry="store.load"
       >
-        <IncomeCard
-          v-for="item in store.items"
-          :key="item.id"
-          :income="item"
-          :highlighted="highlightId === item.id"
-          @edit="openEdit"
-          @remove="confirmRemove"
-        />
+        <article
+          v-for="goal in store.items"
+          :key="goal.id"
+          class="k-goal"
+        >
+          <div class="k-goal__body">
+            <h3 class="k-goal__title">{{ goal.title }}</h3>
+            <p class="k-goal__meta">
+              {{ formatMoney(goal.saved_amount) }} / {{ formatMoney(goal.target_amount) }}
+            </p>
+            <q-linear-progress
+              :value="progress(goal) / 100"
+              size="8px"
+              rounded
+              color="primary"
+              track-color="grey-3"
+              class="q-mt-sm"
+            />
+            <p v-if="goal.target_date" class="k-goal__date">
+              К {{ formatDate(goal.target_date) }}
+            </p>
+          </div>
+          <div class="k-goal__actions">
+            <q-btn flat round dense icon="edit" aria-label="Изменить" @click="openEdit(goal.id)" />
+            <q-btn flat round dense icon="delete" color="negative" aria-label="Удалить" @click="confirmRemove(goal.id)" />
+          </div>
+        </article>
       </PageState>
     </div>
 
@@ -29,7 +48,7 @@
         color="primary"
         icon="add"
         class="k-fab"
-        aria-label="Добавить доход"
+        aria-label="Добавить цель"
         @click="openCreate"
       />
     </q-page-sticky>
@@ -37,47 +56,33 @@
     <q-dialog v-model="formOpen" position="bottom">
       <q-card class="k-sheet" style="min-width: 100%">
         <q-card-section>
-          <div class="text-h6">{{ editingId ? 'Редактирование' : 'Новый доход' }}</div>
+          <div class="text-h6">{{ editingId ? 'Редактирование' : 'Новая цель' }}</div>
         </q-card-section>
         <q-card-section class="q-pt-none">
           <q-form class="k-stack" @submit.prevent="onSubmit">
-            <q-input v-model="form.title" label="Заголовок *" outlined dense :rules="[required]" />
-            <q-input v-model="form.description" label="Описание" outlined dense type="textarea" autogrow />
+            <q-input v-model="form.title" label="Название *" outlined dense :rules="[required]" />
             <q-input
-              v-model.number="form.amount"
+              v-model.number="form.target_amount"
               type="number"
-              label="Сумма, ₽ *"
+              label="Сумма цели, ₽ *"
               outlined
               dense
               :rules="[required, positive]"
             />
-            <q-toggle
-              v-model="form.is_recurring"
-              label="Регулярный (ежемесячно)"
-              color="primary"
-            />
             <q-input
-              v-if="form.is_recurring"
-              v-model.number="form.day_of_month"
+              v-model.number="form.saved_amount"
               type="number"
-              label="День месяца (1–31) *"
+              label="Уже накоплено, ₽"
               outlined
               dense
-              :rules="[required, dayRule]"
-            />
-            <q-toggle
-              v-if="form.is_recurring"
-              v-model="form.is_spending_anchor"
-              label="Учитывать в лимите (якорь)"
-              color="primary"
+              :min="0"
             />
             <q-input
-              v-model="form.received_at"
+              v-model="form.target_date"
               type="date"
-              :label="form.is_recurring ? 'Дата последнего поступления' : 'Дата *'"
+              label="Желаемая дата (необязательно)"
               outlined
               dense
-              :rules="form.is_recurring ? [] : [required]"
             />
             <q-btn
               type="submit"
@@ -97,7 +102,7 @@
 
     <q-dialog v-model="confirmDelete">
       <q-card class="k-panel" style="min-width: 300px">
-        <q-card-section class="text-body1 text-weight-medium">Удалить доход?</q-card-section>
+        <q-card-section class="text-body1 text-weight-medium">Удалить цель?</q-card-section>
         <q-card-actions align="right" class="q-pa-md">
           <q-btn flat label="Отмена" v-close-popup no-caps />
           <q-btn unelevated color="negative" label="Удалить" no-caps @click="doRemove" />
@@ -108,22 +113,18 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { onMounted, ref } from 'vue'
 import { useQuasar } from 'quasar'
-import { useIncomesStore } from 'src/stores/incomes'
+import { useGoalsStore } from 'src/stores/goals'
 import PageHeader from 'src/components/common/PageHeader.vue'
 import PageState from 'src/components/common/PageState.vue'
-import IncomeCard from 'src/components/incomes/IncomeCard.vue'
+import { useFormatMoney } from 'src/composables/useFormatMoney'
+import { useFormatDate } from 'src/composables/useFormatDate'
 
 const $q = useQuasar()
-const route = useRoute()
-const store = useIncomesStore()
-
-const highlightId = computed(() => {
-  const raw = route.query.highlight
-  return raw ? Number(raw) : null
-})
+const store = useGoalsStore()
+const { formatMoney } = useFormatMoney()
+const { formatDate } = useFormatDate()
 
 const formOpen = ref(false)
 const editingId = ref(null)
@@ -133,19 +134,20 @@ const deleteId = ref(null)
 
 const emptyForm = () => ({
   title: '',
-  description: '',
-  amount: null,
-  received_at: new Date().toISOString().slice(0, 10),
-  is_recurring: false,
-  day_of_month: null,
-  is_spending_anchor: false
+  target_amount: null,
+  saved_amount: 0,
+  target_date: null
 })
 
 const form = ref(emptyForm())
 
 const required = (v) => (v !== null && v !== undefined && String(v).trim() !== '') || 'Обязательное поле'
 const positive = (v) => (v > 0) || 'Больше нуля'
-const dayRule = (v) => (v >= 1 && v <= 31) || 'От 1 до 31'
+
+function progress (goal) {
+  if (!goal.target_amount) return 0
+  return Math.min(100, Math.round((goal.saved_amount / goal.target_amount) * 100))
+}
 
 onMounted(() => store.load())
 
@@ -161,12 +163,9 @@ async function openEdit (id) {
     editingId.value = id
     form.value = {
       title: item.title,
-      description: item.description || '',
-      amount: item.amount,
-      received_at: item.received_at,
-      is_recurring: Boolean(item.is_recurring),
-      day_of_month: item.day_of_month ?? null,
-      is_spending_anchor: Boolean(item.is_spending_anchor)
+      target_amount: item.target_amount,
+      saved_amount: item.saved_amount ?? 0,
+      target_date: item.target_date || null
     }
     formOpen.value = true
   } catch (e) {
@@ -179,12 +178,9 @@ async function onSubmit () {
   try {
     const payload = {
       title: form.value.title.trim(),
-      description: form.value.description?.trim() || null,
-      amount: form.value.amount,
-      received_at: form.value.received_at || new Date().toISOString().slice(0, 10),
-      is_recurring: form.value.is_recurring,
-      day_of_month: form.value.is_recurring ? form.value.day_of_month : null,
-      is_spending_anchor: form.value.is_recurring ? form.value.is_spending_anchor : false
+      target_amount: form.value.target_amount,
+      saved_amount: form.value.saved_amount ?? 0,
+      target_date: form.value.target_date || null
     }
     if (editingId.value) {
       await store.update(editingId.value, payload)
@@ -216,3 +212,44 @@ async function doRemove () {
   }
 }
 </script>
+
+<style scoped lang="scss">
+.k-goal {
+  display: flex;
+  gap: var(--k-space-3);
+  padding: var(--k-space-4);
+  background: var(--k-surface);
+  border-radius: var(--k-radius-lg);
+  border: 1px solid var(--k-border);
+  margin-bottom: var(--k-space-3);
+
+  &__body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+  }
+
+  &__meta {
+    margin: 4px 0 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--k-primary);
+  }
+
+  &__date {
+    margin: 6px 0 0;
+    font-size: 0.8125rem;
+    color: var(--k-text-secondary);
+  }
+
+  &__actions {
+    display: flex;
+    flex-shrink: 0;
+  }
+}
+</style>

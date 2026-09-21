@@ -1,7 +1,6 @@
 import dashboardMock from 'src/mocks/dashboard.json'
 import obligationsMock from 'src/mocks/obligations.json'
 import calendarMock from 'src/mocks/calendar.json'
-import importSummaryMock from 'src/mocks/import-summary.json'
 
 function delay (ms = 300) {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -12,7 +11,22 @@ function clone (data) {
 }
 
 let obligationsStore = clone(obligationsMock)
-let settingsStore = { notification_mode: 'normal', last_check_in_at: null }
+let settingsStore = {
+  notification_mode: 'normal',
+  last_check_in_at: '2026-05-25T10:00:00+03:00',
+  check_in_streak_weeks: 2,
+  buffer_amount: null
+}
+let goalsStore = [
+  {
+    id: 1,
+    title: 'Ноутбук',
+    target_amount: 120000,
+    saved_amount: 35000,
+    target_date: '2027-02-08',
+    is_active: true
+  }
+]
 let dashboardStore = clone(dashboardMock)
 
 export async function fetchDashboard () {
@@ -175,15 +189,6 @@ let savingsStore = [
   }
 ]
 
-let importsStore = []
-
-let reconciliationSettings = {
-  import_interval_days: 10,
-  last_import_at: '2026-05-22T10:00:00+03:00',
-  primary_anchor: 'auto',
-  salary_day_of_month: 25
-}
-
 export async function fetchIncomes () {
   await delay()
   return clone(incomesStore)
@@ -250,53 +255,44 @@ export async function deleteSaving (id) {
   savingsStore = savingsStore.filter((s) => s.id !== Number(id))
 }
 
-export async function fetchReconciliationSettings () {
+export async function fetchGoals () {
   await delay()
-  return clone(reconciliationSettings)
+  return clone(goalsStore)
 }
 
-export async function updateReconciliationSettings (input) {
+export async function fetchGoal (id) {
   await delay()
-  reconciliationSettings = { ...reconciliationSettings, ...input }
-  return clone(reconciliationSettings)
-}
-
-export async function fetchReconciliationImports () {
-  await delay()
-  return clone(importsStore)
-}
-
-export async function fetchReconciliationImport (id) {
-  await delay()
-  const item = importsStore.find((i) => i.id === Number(id))
-  if (!item) throw new Error('Выписка не найдена')
+  const item = goalsStore.find((g) => g.id === Number(id))
+  if (!item) throw new Error('Цель не найдена')
   return clone(item)
 }
 
-export async function uploadReconciliationImport (bank, file) {
-  void file
-  await delay(500)
-  const item = {
-    id: importsStore.length + 1,
-    bank,
-    status: 'completed',
-    period_from: importSummaryMock.period_from,
-    period_to: importSummaryMock.period_to,
-    original_filename: 'mock.csv',
-    file_size: 1024,
-    imported_at: new Date().toISOString(),
-    transactions_count: 12,
-    summary: {
-      actual_spend: importSummaryMock.actual_spend,
-      planned_spend: importSummaryMock.planned_spend,
-      delta: importSummaryMock.delta
-    }
-  }
-  importsStore.unshift(item)
-  reconciliationSettings.last_import_at = new Date().toISOString()
+export async function createGoal (input) {
+  await delay()
+  const id = Math.max(0, ...goalsStore.map((g) => g.id)) + 1
+  const item = { id, is_active: true, saved_amount: 0, ...input }
+  goalsStore.push(item)
   return clone(item)
 }
 
-export async function downloadReconciliationImport () {
-  void 0
+export async function updateGoal (id, input) {
+  await delay()
+  const index = goalsStore.findIndex((g) => g.id === Number(id))
+  if (index === -1) throw new Error('Цель не найдена')
+  goalsStore[index] = { ...goalsStore[index], ...input }
+  return clone(goalsStore[index])
+}
+
+export async function deleteGoal (id) {
+  await delay()
+  goalsStore = goalsStore.filter((g) => g.id !== Number(id))
+}
+
+export async function registerPushSubscription () {
+  await delay()
+  return { id: 1, endpoint: 'mock-endpoint' }
+}
+
+export async function unregisterPushSubscription () {
+  await delay()
 }

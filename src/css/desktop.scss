@@ -36,7 +36,6 @@
     grid-template-columns: 1fr 1fr;
     grid-template-areas:
       'hero hero'
-      'limits limits'
       'money payment'
       'forecast forecast'
       'incomes savings'
@@ -49,10 +48,6 @@
 
   .dashboard-panel__hero {
     grid-area: hero;
-  }
-
-  .dashboard-panel__limits {
-    grid-area: limits;
   }
 
   .dashboard-panel__money {
@@ -88,8 +83,7 @@
     grid-area: cta;
   }
 
-  .dashboard-panel__hero + .dashboard-panel__limits,
-  .dashboard-panel__limits + .dashboard-panel__money,
+  .dashboard-panel__hero + .dashboard-panel__money,
   .dashboard-panel__money + .dashboard-panel__payment,
   .dashboard-panel__money + .dashboard-panel__forecast,
   .dashboard-panel__payment + .dashboard-panel__forecast {
@@ -143,12 +137,18 @@
     grid-template-columns: 1fr 1fr;
     gap: 0;
 
-    .k-panel__section + .k-panel__section {
+    > .k-panel__section + .k-panel__section {
       border-top: none;
     }
 
-    .k-panel__section:first-child {
+    > .k-panel__section:nth-child(odd):not(:last-child) {
       border-right: 1px solid var(--k-divider);
+    }
+
+    > .k-panel__section:last-child:nth-child(odd) {
+      grid-column: 1 / -1;
+      border-right: none;
+      border-top: 1px solid var(--k-divider);
     }
   }
 

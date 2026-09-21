@@ -42,6 +42,33 @@
       </p>
     </div>
 
+    <div v-if="timelinePreview.length" class="forecast-block__timeline">
+      <p class="forecast-block__sub-label">Ближайшие события</p>
+      <ul class="forecast-block__timeline-list">
+        <li v-for="(row, index) in timelinePreview" :key="index">
+          <span class="forecast-block__timeline-date">{{ formatShortDate(row.date) }}</span>
+          <span
+            class="forecast-block__timeline-amount"
+            :class="row.kind === 'income' ? 'forecast-block__timeline-amount--in' : 'forecast-block__timeline-amount--out'"
+          >
+            {{ row.kind === 'income' ? '+' : '−' }}{{ formatMoney(Math.abs(row.amount)) }}
+          </span>
+          <span class="forecast-block__timeline-title">{{ row.title }}</span>
+          <span class="forecast-block__timeline-balance">→ {{ formatMoney(row.running_balance) }}</span>
+        </li>
+      </ul>
+      <q-btn
+        v-if="timeline.length > timelinePreview.length"
+        flat
+        dense
+        no-caps
+        color="primary"
+        :label="showAllTimeline ? 'Свернуть' : 'Показать все'"
+        class="q-mt-sm"
+        @click="showAllTimeline = !showAllTimeline"
+      />
+    </div>
+
     <div v-if="payoff.length" class="forecast-block__payoff">
       <p class="forecast-block__sub-label">Когда закроется долг</p>
       <ul class="forecast-block__payoff-list">
@@ -72,7 +99,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useFormatMoney } from 'src/composables/useFormatMoney'
 import { useFormatDate } from 'src/composables/useFormatDate'
 
@@ -83,16 +110,24 @@ const props = defineProps({
 const { formatMoney } = useFormatMoney()
 const { formatDate, formatShortDate, daysLabel } = useFormatDate()
 
+const showAllTimeline = ref(false)
+
 const nextIncome = computed(() => props.forecast?.next_income || null)
 const coverage = computed(() => props.forecast?.next_obligation_coverage || null)
 const payoff = computed(() => props.forecast?.debt_payoff || [])
+const timeline = computed(() => props.forecast?.timeline || [])
+
+const timelinePreview = computed(() => {
+  if (showAllTimeline.value) return timeline.value
+  return timeline.value.slice(0, 8)
+})
 
 const coverageClass = computed(() =>
   coverage.value?.covers ? 'forecast-block__coverage--ok' : 'forecast-block__coverage--bad'
 )
 
 const hasContent = computed(
-  () => nextIncome.value || coverage.value || payoff.value.length
+  () => nextIncome.value || coverage.value || payoff.value.length || timeline.value.length
 )
 </script>
 
@@ -150,6 +185,52 @@ const hasContent = computed(
   gap: 6px;
   font-size: 0.875rem;
   font-weight: 500;
+}
+
+.forecast-block__timeline-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--k-space-2);
+  font-size: 0.8125rem;
+}
+
+.forecast-block__timeline-list li {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  gap: var(--k-space-2);
+  align-items: baseline;
+}
+
+.forecast-block__timeline-date {
+  color: var(--k-text-secondary);
+  white-space: nowrap;
+}
+
+.forecast-block__timeline-amount {
+  font-weight: 700;
+  white-space: nowrap;
+
+  &--in {
+    color: var(--q-positive);
+  }
+
+  &--out {
+    color: var(--q-negative);
+  }
+}
+
+.forecast-block__timeline-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.forecast-block__timeline-balance {
+  color: var(--k-text-secondary);
+  white-space: nowrap;
 }
 
 .forecast-block__sub-label {

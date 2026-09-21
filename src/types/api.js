@@ -1,12 +1,8 @@
 /**
  * @typedef {'green' | 'yellow' | 'red'} Zone
- * @typedef {'salary' | 'import'} AnchorKind
- * @typedef {'auto' | 'salary' | 'import'} PrimaryAnchor
  * @typedef {'quiet' | 'normal' | 'payments_only'} NotificationMode
  * @typedef {'loan' | 'installment' | 'personal_debt' | 'rent' | 'subscription' | 'other'} ObligationType
  * @typedef {'planned' | 'paid' | 'skipped'} ObligationPaymentStatus
- * @typedef {'sber' | 'yandex_pay'} BankId
- * @typedef {'processing' | 'completed' | 'failed'} ImportStatus
  *
  * @typedef {Object} DashboardResponse
  * @property {number} balance
@@ -14,42 +10,21 @@
  * @property {Zone} zone
  * @property {number} free_after_obligations
  * @property {Object} anchors
- * @property {AnchorKind} anchors.primary
- * @property {Object | null} anchors.salary
- * @property {Object | null} anchors.import
+ * @property {number | null} anchors.primary_income_id
+ * @property {Array} anchors.items
  * @property {number} primary_daily_limit
  * @property {Object | null} next_obligation
- * @property {number} obligations_until_salary_total
+ * @property {number} obligations_until_primary_anchor_total
+ * @property {NotificationMode} notification_mode
  * @property {boolean} check_in_due
- * @property {boolean} import_due
- * @property {boolean} import_overdue
  * @property {Object} streak
- *
- * @typedef {Object} Obligation
- * @property {number} id
- * @property {string} title
- * @property {ObligationType} type
- * @property {number} payment_amount
- * @property {number} payment_day
- * @property {number | null} remaining_amount
- * @property {number | null} total_amount
- * @property {number | null} interest_rate
- * @property {string | null} lender
- * @property {string | null} note
- * @property {boolean} is_active
- * @property {string} next_payment_date
- * @property {string} created_at
- * @property {string} updated_at
+ * @property {Object} goals
  *
  * @typedef {Object} UserSettings
- * @property {number | null} salary_day_of_month
- * @property {number | null} salary_amount
- * @property {7 | 10 | 14} import_interval_days
- * @property {string | null} last_import_at
- * @property {PrimaryAnchor} primary_anchor
- * @property {number | null} buffer_amount
- * @property {number | null} buffer_percent
  * @property {NotificationMode} notification_mode
+ * @property {string | null} last_check_in_at
+ * @property {number} check_in_streak_weeks
+ * @property {number | null} buffer_amount
  */
 
 export const OBLIGATION_TYPES = /** @type {const} */ ([

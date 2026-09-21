@@ -1,11 +1,21 @@
 <template>
-  <article class="k-income" :class="{ 'k-income--recurring': income.is_recurring }">
+  <article
+    class="k-income"
+    :class="{
+      'k-income--recurring': income.is_recurring,
+      'k-income--highlight': highlighted
+    }"
+  >
     <div class="k-income__body">
       <div class="k-income__title-row">
         <h3 class="k-income__title">{{ income.title }}</h3>
         <span v-if="income.is_recurring" class="k-income__badge">
           <q-icon name="autorenew" size="14px" />
           ежемесячно
+        </span>
+        <span v-if="income.is_spending_anchor" class="k-income__badge k-income__badge--anchor">
+          <q-icon name="anchor" size="14px" />
+          якорь
         </span>
       </div>
       <p v-if="income.description" class="k-income__desc">{{ income.description }}</p>
@@ -32,7 +42,8 @@ import { useFormatMoney } from 'src/composables/useFormatMoney'
 import { useFormatDate } from 'src/composables/useFormatDate'
 
 defineProps({
-  income: { type: Object, required: true }
+  income: { type: Object, required: true },
+  highlighted: { type: Boolean, default: false }
 })
 
 defineEmits(['edit', 'remove'])
@@ -53,6 +64,10 @@ const { formatDate } = useFormatDate()
 
   &--recurring {
     border-color: rgba(13, 148, 136, 0.28);
+  }
+
+  &--highlight {
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.35);
   }
 
   &__body {
@@ -83,6 +98,11 @@ const { formatDate } = useFormatDate()
     border-radius: 999px;
     background: rgba(13, 148, 136, 0.12);
     color: var(--k-primary);
+
+    &--anchor {
+      background: rgba(79, 70, 229, 0.12);
+      color: #4f46e5;
+    }
   }
 
   &__desc {

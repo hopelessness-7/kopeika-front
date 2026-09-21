@@ -16,17 +16,11 @@ const routes = [
         component: () => import('pages/ObligationFormPage.vue')
       },
       { path: 'incomes', component: () => import('pages/IncomesPage.vue') },
+      { path: 'goals', component: () => import('pages/GoalsPage.vue') },
       { path: 'savings', component: () => import('pages/SavingsPage.vue') },
-      { path: 'reconciliation', component: () => import('pages/ReconciliationPage.vue') },
-      {
-        path: 'reconciliation/:id',
-        component: () => import('pages/ReconciliationDetailPage.vue')
-      },
       { path: 'calendar', component: () => import('pages/CalendarPage.vue') },
       { path: 'check-in', component: () => import('pages/CheckInPage.vue') },
-      { path: 'settings', component: () => import('pages/SettingsPage.vue') },
-      { path: 'import', redirect: '/reconciliation' },
-      { path: 'import/:id/summary', redirect: (to) => `/reconciliation/${to.params.id}` }
+      { path: 'settings', component: () => import('pages/SettingsPage.vue') }
     ]
   },
   {

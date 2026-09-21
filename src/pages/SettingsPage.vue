@@ -4,6 +4,8 @@
 
     <div class="k-page-body">
       <div class="k-panel k-settings-grid">
+        <FinanceSettingsSection />
+        <NotificationSettingsSection />
         <AuthAccountSection />
         <ThemeSection />
       </div>
@@ -15,4 +17,6 @@
 import PageHeader from 'src/components/common/PageHeader.vue'
 import ThemeSection from 'src/components/settings/ThemeSection.vue'
 import AuthAccountSection from 'src/components/settings/AuthAccountSection.vue'
+import FinanceSettingsSection from 'src/components/settings/FinanceSettingsSection.vue'
+import NotificationSettingsSection from 'src/components/settings/NotificationSettingsSection.vue'
 </script>

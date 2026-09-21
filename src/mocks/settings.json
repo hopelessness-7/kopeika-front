@@ -1,10 +1,6 @@
 {
-  "salary_day_of_month": 25,
-  "salary_amount": 120000,
-  "import_interval_days": 10,
-  "last_import_at": "2026-05-22",
-  "primary_anchor": "auto",
-  "buffer_amount": 5000,
-  "buffer_percent": null,
-  "notification_mode": "normal"
+  "notification_mode": "normal",
+  "last_check_in_at": "2026-05-25T10:00:00+03:00",
+  "check_in_streak_weeks": 2,
+  "buffer_amount": null
 }

@@ -128,41 +128,6 @@ export async function deleteSaving (id) {
   await api.delete(`/savings/${id}`)
 }
 
-export async function fetchReconciliationSettings () {
-  const { data } = await api.get('/reconciliation/settings')
-  return data
-}
-
-export async function updateReconciliationSettings (input) {
-  const { data } = await api.put('/reconciliation/settings', input)
-  return data
-}
-
-export async function fetchReconciliationImports () {
-  const { data } = await api.get('/reconciliation/imports')
-  return unwrapList(data)
-}
-
-export async function fetchReconciliationImport (id) {
-  const { data } = await api.get(`/reconciliation/imports/${id}`)
-  return data
-}
-
-export async function uploadReconciliationImport (bank, file) {
-  const form = new FormData()
-  form.append('bank', bank)
-  form.append('file', file)
-  const { data } = await api.post('/reconciliation/imports', form, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  })
-  return data
-}
-
-export async function downloadReconciliationImport (id) {
-  const base = api.defaults.baseURL?.replace(/\/api\/?$/, '') || 'http://localhost:8080'
-  window.open(`${base}/api/reconciliation/imports/${id}/download`, '_blank', 'noopener')
-}
-
 export async function fetchCalendar (from, to) {
   const { data } = await api.get('/calendar', { params: { from, to } })
   const payload = unwrapOne(data) ?? data
@@ -178,4 +143,37 @@ export async function fetchSettings () {
 export async function updateSettings (input) {
   const { data } = await api.put('/settings', input)
   return data
+}
+
+export async function fetchGoals () {
+  const { data } = await api.get('/goals')
+  return unwrapList(data)
+}
+
+export async function fetchGoal (id) {
+  const { data } = await api.get(`/goals/${id}`)
+  return unwrapOne(data)
+}
+
+export async function createGoal (input) {
+  const { data } = await api.post('/goals', input)
+  return unwrapOne(data)
+}
+
+export async function updateGoal (id, input) {
+  const { data } = await api.put(`/goals/${id}`, input)
+  return unwrapOne(data)
+}
+
+export async function deleteGoal (id) {
+  await api.delete(`/goals/${id}`)
+}
+
+export async function registerPushSubscription (input) {
+  const { data } = await api.post('/push-subscriptions', input)
+  return data
+}
+
+export async function unregisterPushSubscription (endpoint) {
+  await api.delete('/push-subscriptions', { data: { endpoint } })
 }

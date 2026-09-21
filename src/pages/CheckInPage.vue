@@ -1,6 +1,6 @@
 <template>
   <q-page class="k-page checkin-page">
-    <PageHeader title="Быстрая сверка" subtitle="Пара вопросов — план обновится" back back-to="/" />
+    <PageHeader title="Уточнение баланса" subtitle="Пара вопросов — план обновится" back back-to="/" />
 
     <div class="k-page-body k-panel">
       <section class="k-panel__section">
@@ -32,7 +32,7 @@
         </q-step>
 
         <q-step :name="2" title="Крупные траты" icon="shopping_cart" :done="step > 2">
-          <p class="step-text">Были крупные траты с прошлой сверки?</p>
+          <p class="step-text">Были крупные траты с прошлого уточнения?</p>
           <div class="row q-gutter-sm q-mt-md">
             <q-btn unelevated color="primary" label="Нет" class="k-btn-primary" @click="setExpense(null)" />
             <q-btn outline color="primary" label="Указать сумму" no-caps @click="showExpenseInput = true" />

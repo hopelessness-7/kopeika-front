@@ -14,9 +14,9 @@
             :data="store.data"
             @update-balance="balanceDialog = true"
             @check-in="$router.push('/check-in')"
-            @import="$router.push('/reconciliation')"
             @incomes="$router.push('/incomes')"
             @savings="$router.push('/savings')"
+            @goals="$router.push('/goals')"
             @settings="$router.push('/settings')"
           />
         </PageState>
