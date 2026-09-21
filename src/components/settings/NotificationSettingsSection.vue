@@ -11,16 +11,28 @@
       color="primary"
       class="q-mt-md"
     />
-    <q-btn
-      v-if="pushSupported"
-      outline
-      color="primary"
-      :label="pushEnabled ? 'Отключить push' : 'Включить push'"
-      class="q-mt-md full-width"
-      no-caps
-      :loading="pushLoading"
-      @click="togglePush"
-    />
+
+    <div class="notification-settings__push q-mt-md">
+      <p
+        v-if="pushStatusHint"
+        class="notification-settings__status"
+        :class="{ 'notification-settings__status--warn': pushBlocked }"
+      >
+        {{ pushStatusHint }}
+      </p>
+      <q-btn
+        v-if="showPushButton"
+        outline
+        color="primary"
+        :label="pushEnabled ? 'Отключить push' : 'Включить push'"
+        class="full-width"
+        no-caps
+        :loading="pushLoading"
+        :disable="pushBlocked && !pushEnabled"
+        @click="togglePush"
+      />
+    </div>
+
     <q-btn
       unelevated
       color="primary"
@@ -34,10 +46,15 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useQuasar } from 'quasar'
 import { useSettingsStore } from 'src/stores/settings'
 import { registerPushSubscription, unregisterPushSubscription } from 'src/services/api'
+import {
+  getVapidPublicKey,
+  isWebPushSupported,
+  urlBase64ToUint8Array
+} from 'src/utils/push'
 
 const $q = useQuasar()
 const store = useSettingsStore()
@@ -45,6 +62,10 @@ const mode = ref('normal')
 const pushSupported = ref(false)
 const pushEnabled = ref(false)
 const pushLoading = ref(false)
+const permission = ref(
+  typeof Notification !== 'undefined' ? Notification.permission : 'default'
+)
+const vapidKey = getVapidPublicKey()
 
 const options = [
   { label: 'Тихий режим', value: 'quiet' },
@@ -52,12 +73,41 @@ const options = [
   { label: 'Только платежи', value: 'payments_only' }
 ]
 
+const pushBlocked = computed(() => {
+  if (!pushSupported.value) return true
+  if (!vapidKey) return true
+  if (permission.value === 'denied') return true
+  return false
+})
+
+const showPushButton = computed(() => pushSupported.value)
+
+const pushStatusHint = computed(() => {
+  if (!pushSupported.value) {
+    return 'Этот браузер не поддерживает Web Push (нужны Service Worker и PushManager).'
+  }
+  if (!vapidKey) {
+    return 'Не задан VITE_VAPID_PUBLIC_KEY — push недоступен. Добавьте публичный VAPID-ключ в .env и перезапустите dev-сервер.'
+  }
+  if (permission.value === 'denied') {
+    return 'Уведомления запрещены в настройках браузера. Разрешите их для этого сайта, чтобы включить push.'
+  }
+  if (pushEnabled.value) {
+    return 'Push включён для этого устройства.'
+  }
+  return 'После включения браузер запросит разрешение на уведомления.'
+})
+
 onMounted(async () => {
   if (!store.data) {
     await store.load()
   }
   mode.value = store.data?.notification_mode ?? 'normal'
-  pushSupported.value = 'serviceWorker' in navigator && 'PushManager' in window
+  pushSupported.value = isWebPushSupported()
+  if (!pushSupported.value) return
+
+  permission.value = Notification.permission
+  await refreshSubscriptionState()
 })
 
 watch(
@@ -66,6 +116,16 @@ watch(
     if (value) mode.value = value
   }
 )
+
+async function refreshSubscriptionState () {
+  try {
+    const reg = await navigator.serviceWorker.ready
+    const sub = await reg.pushManager.getSubscription()
+    pushEnabled.value = Boolean(sub)
+  } catch {
+    pushEnabled.value = false
+  }
+}
 
 async function save () {
   try {
@@ -76,6 +136,20 @@ async function save () {
   }
 }
 
+function pushErrorMessage (error) {
+  const msg = error?.message || String(error || '')
+  if (/permission|разрешен/i.test(msg) || permission.value === 'denied') {
+    return 'Разрешение на уведомления не получено'
+  }
+  if (/applicationServerKey|InvalidAccessError|not a valid/i.test(msg)) {
+    return 'Некорректный VAPID-ключ. Проверьте VITE_VAPID_PUBLIC_KEY.'
+  }
+  if (/service worker|registration/i.test(msg)) {
+    return 'Service Worker ещё не готов. Обновите страницу и попробуйте снова.'
+  }
+  return msg || 'Не удалось изменить push-подписку'
+}
+
 async function togglePush () {
   if (!pushSupported.value) return
   pushLoading.value = true
@@ -84,32 +158,54 @@ async function togglePush () {
       const reg = await navigator.serviceWorker.ready
       const sub = await reg.pushManager.getSubscription()
       if (sub) {
-        await unregisterPushSubscription(sub.endpoint)
+        try {
+          await unregisterPushSubscription(sub.endpoint)
+        } catch (apiError) {
+          // Local unsubscribe still useful if API fails after logout/etc.
+          console.warn('unregisterPushSubscription failed', apiError)
+        }
         await sub.unsubscribe()
       }
       pushEnabled.value = false
       $q.notify({ type: 'positive', message: 'Push отключён', position: 'top' })
-    } else {
-      const permission = await Notification.requestPermission()
-      if (permission !== 'granted') {
-        throw new Error('Разрешение на уведомления не получено')
-      }
-      const reg = await navigator.serviceWorker.ready
-      const vapidKey = import.meta.env.VITE_VAPID_PUBLIC_KEY
-      const sub = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: vapidKey || undefined
-      })
-      const json = sub.toJSON()
-      await registerPushSubscription({
-        endpoint: json.endpoint,
-        keys: json.keys
-      })
-      pushEnabled.value = true
-      $q.notify({ type: 'positive', message: 'Push включён', position: 'top' })
+      return
     }
+
+    if (!vapidKey) {
+      throw new Error('Не задан VITE_VAPID_PUBLIC_KEY')
+    }
+
+    const nextPermission = await Notification.requestPermission()
+    permission.value = nextPermission
+    if (nextPermission !== 'granted') {
+      throw new Error('Разрешение на уведомления не получено')
+    }
+
+    const reg = await navigator.serviceWorker.ready
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(vapidKey)
+    })
+    const json = sub.toJSON()
+    if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) {
+      throw new Error('Браузер вернул неполную push-подписку')
+    }
+
+    await registerPushSubscription({
+      endpoint: json.endpoint,
+      keys: {
+        p256dh: json.keys.p256dh,
+        auth: json.keys.auth
+      }
+    })
+    pushEnabled.value = true
+    $q.notify({ type: 'positive', message: 'Push включён', position: 'top' })
   } catch (e) {
-    $q.notify({ type: 'negative', message: e.message, position: 'top' })
+    $q.notify({
+      type: 'negative',
+      message: pushErrorMessage(e),
+      position: 'top'
+    })
   } finally {
     pushLoading.value = false
   }
@@ -122,5 +218,17 @@ async function togglePush () {
   font-size: 0.8125rem;
   line-height: 1.45;
   color: var(--k-text-secondary);
+}
+
+.notification-settings__status {
+  margin: 0 0 var(--k-space-2);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--k-text-secondary);
+}
+
+.notification-settings__status--warn {
+  color: var(--k-text-secondary);
+  opacity: 0.95;
 }
 </style>

@@ -2,6 +2,7 @@
   "name": "Kopeika",
   "short_name": "Kopeika",
   "description": "Личные финансы — лимит, долги, цели",
+  "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",
