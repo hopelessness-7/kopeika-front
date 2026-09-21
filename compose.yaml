@@ -16,6 +16,8 @@ services:
         volumes:
             - '.:/app'
             - front_node_modules:/app/node_modules
+        # Volume outlives image rebuilds; npm ci on start keeps workbox/etc. in sync with lockfile.
+        command: ['sh', '-c', 'npm ci --ignore-scripts && npm run dev -- -H 0.0.0.0 -p 9000']
         networks:
             - kopeika
 
