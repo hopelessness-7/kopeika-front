@@ -31,6 +31,8 @@ docker compose logs -f front
 UI: http://localhost:9000  
 API ожидается на http://localhost:8080/api (см. репозиторий `kopeika-back`).
 
+При старте контейнер делает `npm ci` в named volume `front_node_modules` (нужен для PWA/workbox). После смены зависимостей достаточно `docker compose restart front`; если volume совсем битый: `docker compose down -v && docker compose up -d`.
+
 ## Локально (быстрее, без Docker)
 
 ```bash

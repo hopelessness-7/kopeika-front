@@ -8,13 +8,12 @@ RUN apt-get update \
 
 # ------- DEVELOPMENT -------
 # В dev /app затирается bind-mount'ом из compose.yaml,
-# а node_modules живёт в named volume — поэтому при старте
-# entrypoint делает npm install (иначе после добавления workbox и т.п.
-# InjectManifest SW падает с "Could not resolve").
-# quasar prepare выполнит сам `quasar dev` при старте.
+# а node_modules живёт в named volume — entrypoint/`compose command`
+# делают `npm ci`, иначе после добавления workbox InjectManifest SW
+# падает с "Could not resolve". quasar prepare — внутри `quasar dev`.
 FROM base AS development
 COPY package.json package-lock.json* ./
-RUN npm install --ignore-scripts
+RUN npm ci --ignore-scripts
 COPY docker/dev-entrypoint.sh /usr/local/bin/dev-entrypoint.sh
 RUN chmod +x /usr/local/bin/dev-entrypoint.sh
 COPY . .
